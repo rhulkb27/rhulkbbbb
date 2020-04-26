@@ -9,7 +9,16 @@
   "author": "Michiel Mulders",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0"
+    "async": "^3.2.0",
+    "discord.js": "^11.6.4",
+    "dotenv": "^8.2.0",
+    "fs": "0.0.1-security",
+    "lodash": "^4.17.15",
+    "node-fetch": "^2.6.0",
+    "nodemon": "^2.0.3",
+    "postman-request": "^2.88.1-postman.22",
+    "request": "^2.88.2",
+    "superagent": "^5.2.2",
+    "superagent-retry-delay": "^2.4.2"
   }
 }
