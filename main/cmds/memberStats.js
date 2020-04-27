@@ -91,10 +91,6 @@ async function memberStats(clanQuery, shipQuery) {
   return new Map([...prMap.entries()].sort((a, b) => b[1] - a[1]))
 }
 
-// async function main() {
-//   let text = await handler('rng', 'haku')
-//   console.log(text)
-// }
-//
-// main()
+// await handler('rng', 'haku')
+
 module.exports.memberStats = memberStats;
