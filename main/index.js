@@ -16,6 +16,8 @@ bot.on('message', async message => {
 
   var args = message.content.split(' ').slice(1);
 
+  message.channel.startTyping()
+
   switch (command) {
     case 'm':
       var data = await memberStats.memberStats(args[0], args[1])
@@ -27,6 +29,8 @@ bot.on('message', async message => {
       break;
   }
 
+  message.channel.stopTyping()
+  
 });
 
 function getUserFromMention(mention) {

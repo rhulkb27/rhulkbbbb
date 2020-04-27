@@ -14,7 +14,7 @@ async function handler() {
       page_no: i
     })
     Object.keys(ships.body.data).forEach(key => {
-      map.set(ships.body.data[key].name, key);
+      if (!ships.body.data[key].name.includes('[')) map.set(ships.body.data[key].name, key);
     });
   }
   let obj = Array.from(map).reduce((obj, [key, value]) => (
