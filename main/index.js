@@ -21,16 +21,19 @@ bot.on('message', async message => {
   switch (command) {
     case 'm':
       var data = await memberStats.memberStats(args[0], args[1])
-      var text = ''
-      for (let i = 0; i < Math.min(15, data.size); i++) {
-        text += `${Array.from(data)[i][0]}: ${Array.from(data)[i][1]}\n`
-      }
-      message.channel.send(text)
+      // var text = ''
+      // for (let i = 0; i < Math.min(15, data.size); i++) {
+      //   text += `${Array.from(data)[i][0]}: ${Array.from(data)[i][1]}\n`
+      // }
+      // message.channel.send(text)
+      message.channel.send({
+        embed: data
+      });
       break;
   }
 
   message.channel.stopTyping()
-  
+
 });
 
 function getUserFromMention(mention) {
