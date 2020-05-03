@@ -4,6 +4,7 @@ const config = require('./config.json');
 const fs = require('fs')
 const promisify = require('util').promisify;
 const memberStats = require('./cmds/memberStats')
+const history = require('./cmds/history')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
@@ -28,8 +29,17 @@ bot.on('message', async message => {
       // message.channel.send(text)
       message.channel.send({
         embed: data
-      });
-      break;
+      })
+      break
+
+    case 'h':
+    console.log('' + args[0] + args[1] + args[2]);
+
+      var data = await history.history(args[0], args[1], args[2])
+      message.channel.send({
+        embed: data
+      })
+      break
   }
 
   message.channel.stopTyping()
