@@ -12,7 +12,7 @@ const apikey = "3e2c393d58645e4e4edb5c4033c56bd8"
 async function memberStats(clanQuery, shipQuery) {
   var map = new Map()
 
-  var shipsJson = fs.readFileSync('ships.json')
+  var shipsJson = fs.readFileSync(`${__dirname}/../utility/ships.json`)
 
   var shipData = JSON.parse(shipsJson)
 
@@ -80,6 +80,8 @@ async function memberStats(clanQuery, shipQuery) {
     if (memberData.body.data[members[i]] === null) continue
     let data = memberData.body.data[members[i]][0].pvp
 
+    if (data.battles == 0) continue
+
     let rWins = (data.wins / data.battles) / (expectedValues.win_rate / 100)
     let rFrags = (data.frags / data.battles) / expectedValues.average_frags
     let rDmg = data.damage_dealt / data.battles / expectedValues.average_damage_dealt
@@ -136,7 +138,7 @@ module.exports.memberStats = memberStats;
 
 // async function command(args) {
 //   // m.channel.startTyping()
-//   arr = await handler(args[0], args[1])
+//   arr = await memberStats(args[0], args[1])
 //   console.log("Got map");
 //
 //   // m.channel.send({
