@@ -63,6 +63,10 @@ bot.on('message', async message => {
       message.channel.send('', attachment)
       break
 
+    case 'u':
+      graph.update()
+      break
+      
     case 'id':
       let userid = await id.id(args[0])
       message.channel.send(userid.response)
