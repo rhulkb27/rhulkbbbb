@@ -17,7 +17,7 @@ const link = require('./cmds/link')
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
   graph.init()
-  const job = cron.job('*/15 * * * *', () => graph.update())
+  const job = cron.job('*/10 * * * *', () => graph.update())
   job.start()
 });
 
