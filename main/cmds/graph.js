@@ -15,7 +15,7 @@ const userDataApi = 'https://api.worldofwarships.com/wows/ships/stats/'
 const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/json/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 const id = 1023637668
-
+const userIds = [id]
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
@@ -90,13 +90,20 @@ class ShipStats {
 }
 
 function updateHandler() {
-  const userId = [id]
-  for (var i = 0; i < userId.length; i++) {
-    update(userId[i])
+  for (var i = 0; i < userIds.length; i++) {
+    update(userIds[i])
+  }
+}
+
+function initHandler() {
+  for (var i = 0; i < userIds.length; i++) {
+    init(userIds[i])
   }
 }
 
 async function update(playerid) {
+
+  console.log('test');
 
   let prevStats = await graph.get(playerid)
 
@@ -137,8 +144,6 @@ async function update(playerid) {
 
 }
 
-// test()
-
 async function generatePR(data, ship_id) {
   let ship_expected_values = graph.get('expected_values', ship_id)
 
@@ -159,7 +164,7 @@ async function generatePR(data, ship_id) {
 
 async function init(playerid) {
 
-  graph.clear()
+  // graph.clear()
 
   await shipGenerator.shipGenerator()
 
@@ -181,7 +186,7 @@ async function init(playerid) {
   // let playerstats = JSON.parse(testData)
 
   for (var i = 0; i < playerstats.length; i++) {
-    graph.set(playerid, new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
+    graph.ensure(playerid.toString(), new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
       playerstats[i].ship_id)
   }
   // console.log(graph);
@@ -230,8 +235,9 @@ async function main() {
 }
 
 // main()
-
+module.exports.init = initHandler
 module.exports.graph = sendGraph
+module.exports.update = updateHandler
 
 
 

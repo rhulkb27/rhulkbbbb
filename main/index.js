@@ -7,7 +7,7 @@ const {
 
 const bot = new Client();
 const fs = require('fs')
-const promisify = require('util').promisify;
+const cron = require('cron')
 const memberStats = require('./cmds/memberStats')
 const history = require('./cmds/history')
 const graph = require('./cmds/graph')
@@ -15,6 +15,10 @@ const id = require('./cmds/id')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
+  console.log(__dirname)
+  graph.init()
+  const job = cron.job('*/15 * * * *', () => graph.update())
+  job.start()
 });
 
 bot.on('message', async message => {

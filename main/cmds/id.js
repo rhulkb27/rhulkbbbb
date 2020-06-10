@@ -9,7 +9,7 @@ async function idGetter(search) {
     application_id: application_id,
     search: search
   })
-  return id.body.data[0]['account_id']
+  return id.body.data[0]['nickname'] + id.body.data[0]['account_id']
 }
 
 module.exports.id = idGetter
