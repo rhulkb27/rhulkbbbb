@@ -1,7 +1,7 @@
 {
-  "name": "discord-bot",
+  "name": "wows-bot",
   "version": "1.0.0",
-  "description": "Discord bot for SitePoint",
+  "description": "Discord Bot for WoWs stats",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,10 +11,11 @@
     "node": "10.x",
     "npm": "*"
   },
-  "author": "Michiel Mulders",
+  "author": "Bill Xia",
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.0",
+    "better-sqlite3": "^7.0.1",
     "cron": "^1.8.2",
     "discord.js": "^11.6.4",
     "dotenv": "^8.2.0",
