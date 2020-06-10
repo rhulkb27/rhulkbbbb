@@ -226,10 +226,10 @@ async function main() {
   // await test()
   // const job = cron.job('*/20 * * * *', () => updateHandler())
   // job.start()
-  sendGraph()
+  // sendGraph()
 }
 
-main()
+// main()
 
 module.exports.graph = sendGraph
 

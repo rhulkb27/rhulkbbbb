@@ -1,4 +1,10 @@
-const { Client, Attachment } = require('discord.js');
+require('dotenv').config()
+
+const {
+  Client,
+  Attachment
+} = require('discord.js');
+
 const bot = new Client();
 const fs = require('fs')
 const promisify = require('util').promisify;
@@ -7,8 +13,6 @@ const history = require('./cmds/history')
 const graph = require('./cmds/graph')
 const id = require('./cmds/id')
 
-require('dotenv').config();
-
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
 });
@@ -16,13 +20,14 @@ bot.on('ready', () => {
 bot.on('message', async message => {
   if (!message.content.startsWith(process.env.PREFIX) || message.author.bot) return;
 
-  var command = message.content.toLowerCase().slice(config.prefix.length).split(' ')[0];
+  var command = message.content.toLowerCase().slice(process.env.PREFIX.length).split(' ')[0];
 
   var args = message.content.split(' ').slice(1);
 
-
   switch (command) {
+
     case 'm':
+
       message.channel.startTyping()
 
       var data = await memberStats.memberStats(args[0], args[1])

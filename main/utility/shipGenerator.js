@@ -31,9 +31,9 @@ async function handler() {
   ), {})
   graph.set('name_to_id', obj)
   graph.set('ship_id', _.invert(obj))
-  console.log(graph.get('ship_id'));
-  console.log(graph.get('name_to_id'));
+  // console.log(graph.get('ship_id'));
+  // console.log(graph.get('name_to_id'));
 }
 
 module.exports.shipGenerator = handler;
-handler()
+// handler()
