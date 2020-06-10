@@ -33,6 +33,8 @@ class ShipStats {
   }
 
   updateStats(updated_stats, last_battle_time) {
+    this.last_battle_time = last_battle_time
+    if (updated_stats.battles == this.all_stats.battles) return
     var newStatBlock = {
       damage_dealt: updated_stats.damage_dealt - this.all_stats.damage_dealt,
       wins: updated_stats.wins - this.all_stats.wins,
@@ -41,7 +43,6 @@ class ShipStats {
     }
     this.all_stats = updated_stats
     this.games_list.push(newStatBlock)
-    this.last_battle_time = last_battle_time
   }
 
   async getPRGraph(ship_id) {
@@ -99,6 +100,10 @@ function initHandler() {
   for (var i = 0; i < userIds.length; i++) {
     init(userIds[i])
   }
+}
+
+function debug() {
+  console.log(graph)
 }
 
 async function update(playerid) {
@@ -254,7 +259,7 @@ function generateImage(figure, imgOpts) {
   return new Promise((resolve, reject) => {
     plotly.getImage(figure, imgOpts, (err, imageStream) => {
       if (err) return reject(err);
-      var fileStream = fs.createWriteStream('graph.png');
+      var fileStream = fs.createWriteStream('main/cmds/graphs/graph.png');
       imageStream.pipe(fileStream);
       fileStream.on('error', reject);
       fileStream.on('finish', resolve);

@@ -82,6 +82,10 @@ bot.on('message', async message => {
     case 'listLinks':
       message.channel.send(link.listLinks())
       break
+    case 'debug':
+    case 'listGraph':
+      graph.debug()
+      break
   }
 
   message.channel.stopTyping()
