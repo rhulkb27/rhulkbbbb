@@ -227,7 +227,7 @@ async function sendGraph(discord_id, shipQuery, isPR = true) {
   }
   // console.log(graph.get('ship_id'));
   var layout = {
-    title: `${graph.get('ship_id')[ship_id]}`,
+    title: `PR Chart of ${graph.get('ship_id')[ship_id].normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`,
     xaxis: {
       dtick: 1,
     }
@@ -249,7 +249,8 @@ async function sendGraph(discord_id, shipQuery, isPR = true) {
   //   let fileStream = fs.createWriteStream('main/cmds/graphs/graph.png')
   //   imageStream.pipe(fileStream)
   // })
-
+  // console.log(JSON.stringify(figure));
+  // console.log(imgOpts);
   await generateImage(figure, imgOpts)
   fs.copyFileSync('main/cmds/graphs/graph.png', 'main/cmds/graphs/test.png');
   fs.unlinkSync('main/cmds/graphs/test.png')
