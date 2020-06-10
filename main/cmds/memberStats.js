@@ -10,15 +10,12 @@ const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = "3e2c393d58645e4e4edb5c4033c56bd8"
 
 async function memberStats(clanQuery, shipQuery) {
-  var map = new Map()
 
   var shipsJson = fs.readFileSync(`${__dirname}/../utility/ships.json`)
 
   var shipData = JSON.parse(shipsJson)
 
-  Object.keys(shipData).forEach(key => {
-    map.set(key, shipData[key]);
-  });
+  var map = new Map(Object.entries(shipData))
 
   // console.log(map)
 
@@ -47,8 +44,8 @@ async function memberStats(clanQuery, shipQuery) {
     shipId = map.get(shipQuery)
   } else {
     let keyArray = Array.from(map.keys())
-    for (var i = 0; i < keyArray.length; ++i) {
-      if (keyArray[i].toLowerCase().includes(shipQuery.toLowerCase())) {
+    for (var i = 0; i < keyArray.length; i++) {
+      if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
         shipId = map.get(keyArray[i])
         shipName = keyArray[i]
         console.log(keyArray[i])

@@ -1,10 +1,11 @@
-const Discord = require('discord.js');
-const bot = new Discord.Client();
+const { Client, Attachment } = require('discord.js');
+const bot = new Client();
 const config = require('./config.json');
 const fs = require('fs')
 const promisify = require('util').promisify;
 const memberStats = require('./cmds/memberStats')
 const history = require('./cmds/history')
+const graph = require('./cmds/graph')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
@@ -17,10 +18,11 @@ bot.on('message', async message => {
 
   var args = message.content.split(' ').slice(1);
 
-  message.channel.startTyping()
 
   switch (command) {
     case 'm':
+      message.channel.startTyping()
+
       var data = await memberStats.memberStats(args[0], args[1])
       // var text = ''
       // for (let i = 0; i < Math.min(15, data.size); i++) {
@@ -33,12 +35,21 @@ bot.on('message', async message => {
       break
 
     case 'h':
-    console.log('' + args[0] + args[1] + args[2]);
+      // message.channel.startTyping()
+      //
+      // console.log('' + args[0] + args[1] + args[2]);
+      //
+      // var data = await history.history(args[0], args[1], args[2])
+      // message.channel.send({
+      //   embed: data
+      // })
+      break
 
-      var data = await history.history(args[0], args[1], args[2])
-      message.channel.send({
-        embed: data
-      })
+    case 'g':
+      message.channel.startTyping()
+      await graph.graph()
+      const attachment = new Attachment('./cmds/graphs/graph.png');
+      message.channel.send('', attachment);
       break
   }
 
