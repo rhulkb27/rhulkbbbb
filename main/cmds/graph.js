@@ -281,6 +281,7 @@ async function main() {
 module.exports.init = initHandler
 module.exports.graph = sendGraph
 module.exports.update = updateHandler
+module.exports.debug = debug
 
 
 
