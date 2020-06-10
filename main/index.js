@@ -58,7 +58,7 @@ bot.on('message', async message => {
 
     case 'g':
       message.channel.startTyping()
-      await graph.graph()
+      await graph.graph(message.author.id, args[0])
       const attachment = new Attachment(`main/cmds/graphs/graph.png`)
       message.channel.send('', attachment)
       break
@@ -98,7 +98,7 @@ function getUserFromMention(mention) {
       mention = mention.slice(1)
     }
 
-    return bot.users.get(mention);
+    return bot.users.get(mention)
   }
 }
 

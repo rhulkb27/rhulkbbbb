@@ -195,17 +195,19 @@ async function init(playerid) {
   // console.log(graph.get('1036358248'));
 }
 
-async function sendGraph(player_id = id, shipQuery, isPR = true) {
+async function sendGraph(discord_id, shipQuery, isPR = true) {
+
+  let player_id = graph.get('link', discord_id)
 
   var ship_id
   let shipData = graph.get('name_to_id')
-  if (map.hasOwnProperty(shipQuery)) {
-    ship_id = map[shipQuery]
+  if (shipData.hasOwnProperty(shipQuery)) {
+    ship_id = shipData[shipQuery]
   } else {
-    let keyArray = Object.keys(map)
+    let keyArray = Object.keys(shipData)
     for (var i = 0; i < keyArray.length; i++) {
       if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
-        ship_id = map.get(keyArray[i])
+        ship_id = shipData[keyArray[i]]
         console.log(keyArray[i])
         break
       }
@@ -214,9 +216,9 @@ async function sendGraph(player_id = id, shipQuery, isPR = true) {
 
   let trace
   if (isPR) {
-    trace = await (ShipStats.cast(graph.get(id, ship_id))).getPRGraph(ship_id)
+    trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getPRGraph(ship_id)
   } else {
-    trace = await (ShipStats.cast(graph.get(id, ship_id))).getWRGraph(ship_id)
+    trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getWRGraph(ship_id)
   }
   // console.log(graph.get('ship_id'));
   var layout = {
