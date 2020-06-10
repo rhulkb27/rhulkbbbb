@@ -1,18 +1,20 @@
 const { Client, Attachment } = require('discord.js');
 const bot = new Client();
-const config = require('./config.json');
 const fs = require('fs')
 const promisify = require('util').promisify;
 const memberStats = require('./cmds/memberStats')
 const history = require('./cmds/history')
 const graph = require('./cmds/graph')
+const id = require('./cmds/id')
+
+require('dotenv').config();
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
 });
 
 bot.on('message', async message => {
-  if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+  if (!message.content.startsWith(process.env.PREFIX) || message.author.bot) return;
 
   var command = message.content.toLowerCase().slice(config.prefix.length).split(' ')[0];
 
@@ -51,6 +53,11 @@ bot.on('message', async message => {
       const attachment = new Attachment('./cmds/graphs/graph.png');
       message.channel.send('', attachment);
       break
+
+    case 'id':
+      let userid = await id.id(args[0])
+      message.channel.send(userid)
+      break
   }
 
   message.channel.stopTyping()
@@ -71,4 +78,4 @@ function getUserFromMention(mention) {
   }
 }
 
-bot.login(config.token);
+bot.login();
