@@ -12,10 +12,10 @@ const memberStats = require('./cmds/memberStats')
 const history = require('./cmds/history')
 const graph = require('./cmds/graph')
 const id = require('./cmds/id')
+const link = require('./cmds/link')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
-  console.log(__dirname)
   graph.init()
   const job = cron.job('*/15 * * * *', () => graph.update())
   job.start()
@@ -59,31 +59,46 @@ bot.on('message', async message => {
     case 'g':
       message.channel.startTyping()
       await graph.graph()
-      const attachment = new Attachment('./cmds/graphs/graph.png');
-      message.channel.send('', attachment);
+      const attachment = new Attachment(`main/cmds/graphs/graph.png`)
+      message.channel.send('', attachment)
       break
 
     case 'id':
       let userid = await id.id(args[0])
-      message.channel.send(userid)
+      message.channel.send(userid.response)
+      break
+
+    case 'link':
+      var user = message.author
+      var name = args[0]
+      if (args[1])
+        user = getUserFromMention(args[0])
+        name = args[1]
+      var response = await link.link(user.id, name)
+      message.channel.send(`${user} has been linked to ${response}`)
+      break
+
+    case 'll':
+    case 'listLinks':
+      message.channel.send(link.listLinks())
       break
   }
 
   message.channel.stopTyping()
 
-});
+})
 
 function getUserFromMention(mention) {
   if (!mention) return;
 
   if (mention.startsWith('<@') && mention.endsWith('>')) {
-    mention = mention.slice(2, -1);
+    mention = mention.slice(2, -1)
 
     if (mention.startsWith('!')) {
-      mention = mention.slice(1);
+      mention = mention.slice(1)
     }
 
-    return client.users.get(mention);
+    return bot.users.get(mention);
   }
 }
 

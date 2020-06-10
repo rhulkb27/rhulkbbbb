@@ -9,13 +9,13 @@ const plotly = require('plotly')('Shadow_Storm419', 'TxSRgxqeDWdxtwTxzt2H')
 
 const graph = new Enmap({
   name: "graph"
-});
+})
 
 const userDataApi = 'https://api.worldofwarships.com/wows/ships/stats/'
 const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/json/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 const id = 1023637668
-const userIds = [id]
+const userIds = Object.values(graph.get('link'))
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
@@ -185,14 +185,33 @@ async function init(playerid) {
   // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
   // let playerstats = JSON.parse(testData)
 
+  graph.ensure(playerid.toString(), {})
+
   for (var i = 0; i < playerstats.length; i++) {
     graph.ensure(playerid.toString(), new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
       playerstats[i].ship_id)
   }
-  // console.log(graph);
+
+  // console.log(graph.get('1036358248'));
 }
 
-async function sendGraph(player_id = id, ship_id = '4182685136', isPR = true) {
+async function sendGraph(player_id = id, shipQuery, isPR = true) {
+
+  var ship_id
+  let shipData = graph.get('name_to_id')
+  if (map.hasOwnProperty(shipQuery)) {
+    ship_id = map[shipQuery]
+  } else {
+    let keyArray = Object.keys(map)
+    for (var i = 0; i < keyArray.length; i++) {
+      if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
+        ship_id = map.get(keyArray[i])
+        console.log(keyArray[i])
+        break
+      }
+    }
+  }
+
   let trace
   if (isPR) {
     trace = await (ShipStats.cast(graph.get(id, ship_id))).getPRGraph(ship_id)
@@ -216,14 +235,30 @@ async function sendGraph(player_id = id, ship_id = '4182685136', isPR = true) {
     format: 'png',
   }
 
-  plotly.getImage(figure, imgOpts, function(error, imageStream) {
-    if (error) return console.log(error)
+  // plotly.getImage(figure, imgOpts, function(error, imageStream) {
+  //   if (error) return console.log(error)
+  //
+  //   // let fileStream = fs.createWriteStream(`${__dirname}/cmds/graphs/graph.png`)
+  //   let fileStream = fs.createWriteStream('main/cmds/graphs/graph.png')
+  //   imageStream.pipe(fileStream)
+  // })
 
-    let fileStream = fs.createWriteStream('./cmds/graphs/graph.png')
-    imageStream.pipe(fileStream)
-  })
+  await generateImage(figure, imgOpts)
+  fs.copyFileSync('main/cmds/graphs/graph.png', 'main/cmds/graphs/test.png');
+  fs.unlinkSync('main/cmds/graphs/test.png')
 }
 
+function generateImage(figure, imgOpts) {
+  return new Promise((resolve, reject) => {
+    plotly.getImage(figure, imgOpts, (err, imageStream) => {
+      if (err) return reject(err);
+      var fileStream = fs.createWriteStream('graph.png');
+      imageStream.pipe(fileStream);
+      fileStream.on('error', reject);
+      fileStream.on('finish', resolve);
+    })
+  })
+}
 
 async function main() {
   // await init(id)
