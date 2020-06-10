@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({path: __dirname + '/../.env'});
 
 const {
   Client,
@@ -57,16 +57,34 @@ bot.on('message', async message => {
       break
 
     case 'g':
+      // linux
+      // const file = 'main/cmds/graphs/graph.png'
+
+      // mac
+      const file = './graph.png'
+
       message.channel.startTyping()
-      await graph.graph(message.author.id, args[0])
-      const attachment = new Attachment(`main/cmds/graphs/graph.png`)
+
+      var user = message.author
+      var shipQuery = args[0]
+      if (args[1]) {
+        user = getUserFromMention(args[0])
+        shipQuery = args[1]
+      }
+      await graph.graph(user.id, shipQuery)
+      const attachment = new Attachment(file)
       message.channel.send('', attachment)
       break
 
     case 'u':
+    case 'update':
       graph.update()
       break
-      
+
+    case 'init':
+      graph.init()
+      break
+
     case 'id':
       let userid = await id.id(args[0])
       message.channel.send(userid.response)
@@ -75,9 +93,10 @@ bot.on('message', async message => {
     case 'link':
       var user = message.author
       var name = args[0]
-      if (args[1])
+      if (args[1]) {
         user = getUserFromMention(args[0])
         name = args[1]
+      }
       var response = await link.link(user.id, name)
       message.channel.send(`${user} has been linked to ${response}`)
       break
@@ -86,6 +105,7 @@ bot.on('message', async message => {
     case 'listLinks':
       message.channel.send(link.listLinks())
       break
+
     case 'debug':
     case 'listGraph':
       graph.debug()

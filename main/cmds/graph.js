@@ -7,6 +7,15 @@ const shipGenerator = require(`${__dirname}/../utility/shipGenerator`)
 const cron = require('cron')
 const plotly = require('plotly')('Shadow_Storm419', 'TxSRgxqeDWdxtwTxzt2H')
 
+
+// linux
+// const file1 = 'main/cmds/graphs/graph.png'
+// const file2 = 'main/cmds/graphs/test.png'
+
+// mac
+const file1 = './graph.png'
+const file2 = './test.png'
+
 const graph = new Enmap({
   name: "graph"
 })
@@ -251,16 +260,18 @@ async function sendGraph(discord_id, shipQuery, isPR = true) {
   // })
   // console.log(JSON.stringify(figure));
   // console.log(imgOpts);
+
+
   await generateImage(figure, imgOpts)
-  fs.copyFileSync('main/cmds/graphs/graph.png', 'main/cmds/graphs/test.png');
-  fs.unlinkSync('main/cmds/graphs/test.png')
+  fs.copyFileSync(file1, file2);
+  fs.unlinkSync(file2)
 }
 
 function generateImage(figure, imgOpts) {
   return new Promise((resolve, reject) => {
     plotly.getImage(figure, imgOpts, (err, imageStream) => {
       if (err) return reject(err);
-      var fileStream = fs.createWriteStream('main/cmds/graphs/graph.png');
+      var fileStream = fs.createWriteStream(file1);
       imageStream.pipe(fileStream);
       fileStream.on('error', reject);
       fileStream.on('finish', resolve);
