@@ -22,6 +22,7 @@ const id = 1023637668
 
 // var userIds = [id]
 var userIds = Object.values(graph.get('link'))
+console.log(userIds);
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
