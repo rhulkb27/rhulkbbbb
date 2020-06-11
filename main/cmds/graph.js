@@ -226,7 +226,7 @@ async function sendGraph(discord_id, shipQuery, mode) {
     player_name = player_id.nickname
     player_id = player_id.account_id
   } else {
-
+    console.log(graph.get('link', discord_id))
     // throw an error if the player is not linked
     if (!graph.has('link', discord_id)) throw new Error('Player is not linked.')
 
