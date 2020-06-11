@@ -193,7 +193,7 @@ async function init(playerid, discord_id) {
 
     playerstats = playerstats.body.data[playerid]
 
-    console.log(`Adding new stats to ${graph.get('link', discord_id).name}...`)
+    console.log(`Adding new stats...`)
 
     graph.set(playerid.toString(), {})
 

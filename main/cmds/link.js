@@ -9,15 +9,16 @@ const graph = new Enmap({
 
 async function link(discord_id, username) {
   let playerid = await id.id(username)
-  graph.set('link', {
+  await graph.set('link', {
     id: playerid.data['account_id'].toString(),
     name: playerid.data['nickname']
   }, discord_id)
+  console.log(graph.get('link', discord_id))
   await update.initId(playerid.data['account_id'], discord_id)
   return playerid.data['nickname']
 }
 
-function listLinks() { 
+function listLinks() {
   return JSON.stringify(graph.get('link'))
 }
 

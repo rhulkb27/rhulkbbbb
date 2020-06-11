@@ -115,6 +115,7 @@ bot.on('message', async message => {
         user = getUserFromMention(args[0])
         name = args[1]
       }
+      console.log(user);
       var response = await link.link(user.id, name)
       message.channel.send(`${user} has been linked to ${response}`)
       break
@@ -145,6 +146,7 @@ function getUserFromMention(mention) {
     if (mention.startsWith('!')) {
       mention = mention.slice(1)
     }
+    console.log(mention);
     return bot.users.get(mention)
   } else {
     throw new Error('Please enter an actual user')
