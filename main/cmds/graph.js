@@ -107,7 +107,7 @@ async function updateHandler() {
   console.log('Updating...');
   userIds = Object.values(data.graph.get('link'))
   for (var i = 0; i < userIds.length; i++) {
-    update(userIds[i].id)
+    await update(userIds[i].id)
   }
   console.log('Done!');
 }
