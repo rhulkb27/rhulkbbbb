@@ -90,6 +90,11 @@ bot.on('message', async message => {
       message.channel.send(userid.response)
       break
 
+    case 'shipid':
+      let shipid = await id.shipid(args[0])
+      message.channel.send(`${shipid.ship_name}: ${shipid.ship_id}`)
+      break
+
     case 'link':
       var user = message.author
       var name = args[0]
