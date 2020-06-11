@@ -79,13 +79,13 @@ bot.on('message', async message => {
           }
         }
       }
-      // try {
-      await graph.graph(user, shipQuery, mode)
-      const attachment = new Attachment('./graph.png')
-      message.channel.send('', attachment)
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      try {
+        await graph.graph(user, shipQuery, mode)
+        const attachment = new Attachment('./graph.png')
+        message.channel.send('', attachment)
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'u':
