@@ -158,7 +158,7 @@ async function update(playerid) {
 }
 
 async function generatePR(data, ship_id) {
-  let ship_expected_values = graph.get('expected_values', ship_id.ship_id)
+  let ship_expected_values = graph.get('expected_values', ship_id)
 
   let rWins = (data.wins / data.battles) / (ship_expected_values.win_rate / 100)
   let rFrags = (data.frags / data.battles) / ship_expected_values.average_frags
@@ -249,11 +249,11 @@ async function sendGraph(discord_id, shipQuery, mode) {
 
   let titlemode
 
-  if (!mode) {
-    trace = await (ShipStats.cast(graph.get(player_id, ship_id.ship_id))).getPRGraph(ship_id)
+  if (!mode || mode.toLowerCase() == 'pr') {
+    trace = await (ShipStats.cast(graph.get(player_id, ship_id.ship_id))).getPRGraph(ship_id.ship_id)
     titlemode = 'PR'
   } else {
-    if (['wr', 'kills', 'dmg'].includes(mode)) {
+    if (['wr', 'kills', 'dmg'].includes(mode.toLowerCase())) {
       trace = await (ShipStats.cast(graph.get(player_id, ship_id.ship_id))).getOtherGraph(mode)
       titlemode = trace[1]
       trace = trace[0]

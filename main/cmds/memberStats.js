@@ -73,6 +73,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     if (data.battles == 0) continue
 
     let PR = await pr.pr(data, shipId)
+    console.log(PR);
 
     let arr2 = {
       name: memberName.body.data[members[i]].nickname,
@@ -115,7 +116,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
   let em
   if (isCompact) {
     em = {
-      title: `Clan: ${clanTag}            Ship: ${shipName}`,
+      title: `Clan: ${clanTag}              Ship: ${shipName}`,
       description: description
     }
   } else {
