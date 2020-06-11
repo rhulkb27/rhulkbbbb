@@ -28,3 +28,4 @@ function clear() {
 
 module.exports.link = link
 module.exports.listLinks = listLinks
+module.exports.clear = clear
