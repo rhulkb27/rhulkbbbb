@@ -32,8 +32,6 @@ bot.on('message', async message => {
 
     case 'm':
 
-      message.channel.startTyping()
-
       var data = await memberStats.memberStats(args[0], args[1])
       // var text = ''
       // for (let i = 0; i < Math.min(15, data.size); i++) {
@@ -62,8 +60,6 @@ bot.on('message', async message => {
 
       // mac
       const file = './graph.png'
-
-      message.channel.startTyping()
 
       var user = message.author
       var shipQuery = args[0]
@@ -111,8 +107,6 @@ bot.on('message', async message => {
       graph.debug()
       break
   }
-
-  message.channel.stopTyping()
 
 })
 
