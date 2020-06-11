@@ -22,8 +22,7 @@ function listLinks() {
 }
 
 function clear() {
-  let clear = graph.observe('link')
-  clear = {}
+  graph.observe('link') = {}
 }
 
 module.exports.link = link
