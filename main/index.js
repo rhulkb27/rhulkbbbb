@@ -115,6 +115,10 @@ bot.on('message', async message => {
       message.channel.send(link.listLinks())
       break
 
+    case 'clear':
+      link.clear()
+      break
+      
     case 'debug':
     case 'listGraph':
       graph.debug(args[0])

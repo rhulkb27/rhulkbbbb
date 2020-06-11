@@ -21,5 +21,10 @@ function listLinks() {
   return JSON.stringify(graph.get('link'))
 }
 
+function clear() {
+  let clear = graph.observable('link')
+  clear = {}
+}
+
 module.exports.link = link
 module.exports.listLinks = listLinks
