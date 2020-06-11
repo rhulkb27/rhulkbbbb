@@ -23,8 +23,8 @@ async function handler() {
     })
     Object.keys(ships.body.data).forEach(key => {
       if (!ships.body.data[key].name.includes('[') && !ships.body.data[key].has_demo_profile) {
-        if (badShips.includes(ships.body.data[key].name)) continue
-        map.set(ships.body.data[key].name, key)
+        if (!badShips.includes(ships.body.data[key].name))
+          map.set(ships.body.data[key].name, key)
       }
     });
   }
