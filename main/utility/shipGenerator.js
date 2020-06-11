@@ -12,6 +12,7 @@ const key = '3e2c393d58645e4e4edb5c4033c56bd8'
 
 var ships;
 var map = new Map();
+var badShips = ["Alaska B", "Asashio B", "Atago B", "Tirpitz B", "Massachusetts B", "Graf Zeppelin B", "Sims B"]
 
 async function handler() {
   for (let i = 1; i < 6; i++) {
@@ -22,12 +23,15 @@ async function handler() {
     })
     Object.keys(ships.body.data).forEach(key => {
       if (!ships.body.data[key].name.includes('[') && !ships.body.data[key].has_demo_profile) {
+        if (badShips.includes(ships.body.data[key].name)) continue
         map.set(ships.body.data[key].name, key)
       }
     });
   }
   let obj = Array.from(map).reduce((obj, [key, value]) => (
-    Object.assign(obj, { [key]: value })
+    Object.assign(obj, {
+      [key]: value
+    })
   ), {})
   graph.set('name_to_id', obj)
   graph.set('ship_id', _.invert(obj))

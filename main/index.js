@@ -104,7 +104,7 @@ bot.on('message', async message => {
 
     case 'debug':
     case 'listGraph':
-      graph.debug()
+      graph.debug(args[0])
       break
   }
 

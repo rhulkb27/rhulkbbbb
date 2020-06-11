@@ -111,8 +111,8 @@ function initHandler() {
   }
 }
 
-function debug() {
-  console.log(graph)
+function debug(key) {
+  console.log(graph.get(key))
 }
 
 async function update(playerid) {
