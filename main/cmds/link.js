@@ -1,29 +1,30 @@
 const superagent = require('superagent')
-const Enmap = require("enmap");
 const id = require('./id')
 const update = require('./graph')
-
-const graph = new Enmap({
-  name: "graph"
-})
+const data = require('../utility/data')
 
 async function link(discord_id, username) {
-  let playerid = await id.id(username)
-  await graph.set('link', {
+  let playerid
+  try {
+    playerid = await id.id(username)
+  } catch (err) {
+    throw new Error('Please enter a valid username.')
+  }
+  await data.graph.set('link', {
     id: playerid.data['account_id'].toString(),
     name: playerid.data['nickname']
   }, discord_id)
-  console.log(graph.get('link', discord_id))
+  console.log(data.graph.get('link', discord_id))
   await update.initId(playerid.data['account_id'], discord_id)
   return playerid.data['nickname']
 }
 
 function listLinks() {
-  return JSON.stringify(graph.get('link'))
+  return JSON.stringify(data.graph.get('link'))
 }
 
 function clear() {
-  graph.set('link', {})
+  data.graph.set('link', {})
 }
 
 module.exports.link = link

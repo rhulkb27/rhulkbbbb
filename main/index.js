@@ -79,13 +79,13 @@ bot.on('message', async message => {
           }
         }
       }
-      try {
-        await graph.graph(user, shipQuery, mode)
-        const attachment = new Attachment('./graph.png')
-        message.channel.send('', attachment)
-      } catch (err) {
-        message.channel.send(err.message)
-      }
+      // try {
+      await graph.graph(user, shipQuery, mode)
+      const attachment = new Attachment('./graph.png')
+      message.channel.send('', attachment)
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
       break
 
     case 'u':
@@ -115,9 +115,12 @@ bot.on('message', async message => {
         user = getUserFromMention(args[0])
         name = args[1]
       }
-      console.log(user);
-      var response = await link.link(user.id, name)
-      message.channel.send(`${user} has been linked to ${response}`)
+      try {
+        var response = await link.link(user.id, name)
+        message.channel.send(`${user} has been linked to ${response}`)
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'll':
@@ -146,7 +149,6 @@ function getUserFromMention(mention) {
     if (mention.startsWith('!')) {
       mention = mention.slice(1)
     }
-    console.log(mention);
     return bot.users.get(mention)
   } else {
     throw new Error('Please enter an actual user')

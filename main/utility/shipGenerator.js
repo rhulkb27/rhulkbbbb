@@ -1,11 +1,7 @@
 const superagent = require('superagent')
 const fs = require('fs')
-const Enmap = require("enmap");
 const _ = require('lodash')
-
-const graph = new Enmap({
-  name: "graph"
-});
+const data = require('./data')
 
 const api = 'https://api.worldofwarships.com/wows/encyclopedia/ships/'
 const key = '3e2c393d58645e4e4edb5c4033c56bd8'
@@ -33,10 +29,10 @@ async function handler() {
       [key]: value
     })
   ), {})
-  graph.set('name_to_id', obj)
-  graph.set('ship_id', _.invert(obj))
-  // console.log(graph.get('ship_id'));
-  // console.log(graph.get('name_to_id'));
+  data.graph.set('name_to_id', obj)
+  data.graph.set('ship_id', _.invert(obj))
+  // console.log(data.graph.get('ship_id'));
+  // console.log(data.graph.get('name_to_id'));
 }
 
 module.exports.shipGenerator = handler;

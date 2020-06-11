@@ -1,13 +1,9 @@
 const superagent = require('superagent');
 const async = require('async')
 const fs = require('fs')
-const Enmap = require("enmap");
 const id = require('./id')
 const pr = require('./graph')
-
-const graph = new Enmap({
-  name: "graph"
-})
+const data = require('../utility/data')
 
 const clanSearchApi = 'https://api.worldofwarships.com/wows/clans/list/'
 const memberIdApi = 'https://api.worldofwarships.com/wows/clans/info/'
@@ -30,7 +26,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     search: clanQuery
   })
 
-  if (!clanId.body.data[0]) throw new Error('Please enter an actual clan.')
+  if (!clanId.body.data[0]) throw new Error('Please enter a valid clan.')
 
   let memberRequest = await superagent.get(memberIdApi).query({
     application_id: apikey,
@@ -45,7 +41,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
 
   var shipData = id.shipid(shipQuery)
 
-  if (!shipData.ship_id) throw new Error('Please enter an actual ship.')
+  if (!shipData.ship_id) throw new Error('Please enter a valid ship.')
 
   var shipId = shipData.ship_id
   var shipName = shipData.ship_name
