@@ -65,7 +65,7 @@ bot.on('message', async message => {
 
     case 'g':
     case 'graph':
-      var user = message.author
+      var user = message.author.id
       var shipQuery = args[0]
       var mode = args[1]
       if (args[1]) {
