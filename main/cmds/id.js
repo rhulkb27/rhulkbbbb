@@ -1,5 +1,10 @@
 const superagent = require('superagent');
 const async = require('async')
+const Enmap = require("enmap");
+
+const graph = new Enmap({
+  name: "graph"
+})
 
 const usernameApi = 'https://api.worldofwarships.com/wows/account/list/'
 const application_id = '3e2c393d58645e4e4edb5c4033c56bd8'
