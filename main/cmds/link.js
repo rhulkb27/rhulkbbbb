@@ -1,6 +1,7 @@
 const superagent = require('superagent')
 const Enmap = require("enmap");
 const id = require('./id')
+const update = require('./graph')
 
 const graph = new Enmap({
   name: "graph"
@@ -8,7 +9,11 @@ const graph = new Enmap({
 
 async function link(discord_id, username) {
   let playerid = await id.id(username)
-  graph.set('link', playerid.data['account_id'], discord_id)
+  graph.set('link', {
+    id: playerid.data['account_id'],
+    name: playerid.data['nickname']
+  }, discord_id)
+  update.initId(playerid.data['account_id'], discord_id)
   return playerid.data['nickname']
 }
 

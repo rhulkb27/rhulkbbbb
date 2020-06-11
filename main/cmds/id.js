@@ -22,11 +22,12 @@ async function idGetter(search) {
 
 function shipid(shipQuery) {
   var ship_id
+  var keyArray
   let shipData = graph.get('name_to_id')
   if (shipData.hasOwnProperty(shipQuery)) {
     ship_id = shipData[shipQuery]
   } else {
-    let keyArray = Object.keys(shipData)
+    keyArray = Object.keys(shipData)
     for (var i = 0; i < keyArray.length; i++) {
       if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
         ship_id = shipData[keyArray[i]]

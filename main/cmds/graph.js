@@ -7,12 +7,6 @@ const shipGenerator = require(`${__dirname}/../utility/shipGenerator`)
 const cron = require('cron')
 const plotly = require('plotly')('Shadow_Storm419', 'TxSRgxqeDWdxtwTxzt2H')
 
-
-// linux
-// const file1 = 'main/cmds/graphs/graph.png'
-// const file2 = 'main/cmds/graphs/test.png'
-
-// mac
 const file1 = './graph.png'
 const file2 = './test.png'
 
@@ -22,9 +16,12 @@ const graph = new Enmap({
 
 const userDataApi = 'https://api.worldofwarships.com/wows/ships/stats/'
 const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/json/'
+const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 const id = 1023637668
-const userIds = Object.values(graph.get('link'))
+
+// var userIds = [id]
+var userIds = Object.values(graph.get('link'))
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
@@ -84,6 +81,10 @@ class ShipStats {
       y: [],
       type: 'scatter'
     }]
+    var point = {
+      battles: 0,
+      wins: 0
+    }
     for (var i = 0; i < this.games_list.length; i++) {
       point.wins += this.games_list[i].wins
       point.battles += this.games_list[i].battles
@@ -99,16 +100,29 @@ class ShipStats {
   }
 }
 
-function updateHandler() {
+async function updateHandler() {
+  console.log('Updating...');
+  userIds = Object.values(graph.get('link'))
   for (var i = 0; i < userIds.length; i++) {
-    update(userIds[i])
+    update(userIds[i].id)
   }
+  console.log('Done!');
 }
 
-function initHandler() {
-  for (var i = 0; i < userIds.length; i++) {
-    init(userIds[i])
-  }
+async function initHandler() {
+
+  await shipGenerator.shipGenerator()
+
+  let expected_values = await superagent.get(expectedPrApi)
+  expected_values = expected_values.body.data
+
+  graph.set('expected_values', expected_values)
+
+  // userIds = Object.values(graph.get('link'))
+  // console.log(graph.get('link'))
+  // for (var i = 0; i < userIds.length; i++) {
+  //   init(userIds[i].id)
+  // }
 }
 
 function debug(key) {
@@ -116,8 +130,6 @@ function debug(key) {
 }
 
 async function update(playerid) {
-
-  console.log('test');
 
   let prevStats = await graph.get(playerid)
 
@@ -176,42 +188,42 @@ async function generatePR(data, ship_id) {
 
 
 
-async function init(playerid) {
+async function init(playerid, discord_id) {
 
   // graph.clear()
-
-  await shipGenerator.shipGenerator()
-
-  let expected_values = await superagent.get(expectedPrApi)
-  expected_values = expected_values.body.data
-
-  graph.set('expected_values', expected_values)
-
-  let playerstats = await superagent.get(userDataApi).query({
-    application_id: apikey,
-    account_id: playerid,
-    fields: 'last_battle_time, ship_id, pvp.battles, pvp.damage_dealt, pvp.wins, pvp.frags'
-  })
-
-  playerstats = playerstats.body.data[playerid]
 
   // test data
   // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
   // let playerstats = JSON.parse(testData)
 
-  graph.ensure(playerid.toString(), {})
+  if (!graph.has(playerid.toString())) {
 
-  for (var i = 0; i < playerstats.length; i++) {
-    graph.ensure(playerid.toString(), new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
-      playerstats[i].ship_id)
+    let playerstats = await superagent.get(userDataApi).query({
+      application_id: apikey,
+      account_id: playerid,
+      fields: 'last_battle_time, ship_id, pvp.battles, pvp.damage_dealt, pvp.wins, pvp.frags'
+    })
+
+    playerstats = playerstats.body.data[playerid]
+
+    console.log(`Adding new stats to ${graph.get('link', discord_id).name}...`)
+
+    graph.set(playerid.toString(), {})
+
+    for (var i = 0; i < playerstats.length; i++) {
+      graph.set(playerid.toString(), new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
+        playerstats[i].ship_id)
+    }
+    console.log('Done!')
   }
-
-  // console.log(graph.get('1036358248'));
 }
 
-async function sendGraph(discord_id, shipQuery, isPR = true) {
+async function sendGraph(discord_id, shipQuery, isPR) {
 
-  let player_id = graph.get('link', discord_id)
+  // throw an error if the player is not linked
+  if (!graph.has('link', discord_id)) throw new Error('Player is not linked.')
+
+  let player_id = (graph.get('link', discord_id)).id
 
   var ship_id
   let shipData = graph.get('name_to_id')
@@ -228,15 +240,23 @@ async function sendGraph(discord_id, shipQuery, isPR = true) {
     }
   }
 
+  if (!ship_id) throw new Error('Please enter an actual ship u big dumb')
+
+  // throw an error if player does not have any games in the specified ship
+  if (!graph.has(player_id, ship_id)) throw new Error('Player does not have any games in the specified ship.')
+
   let trace
+
   if (isPR) {
     trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getPRGraph(ship_id)
   } else {
     trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getWRGraph(ship_id)
   }
-  // console.log(graph.get('ship_id'));
+
+  let mode = isPR ? 'PR' : 'WR'
+
   var layout = {
-    title: `PR Chart of ${graph.get('ship_id')[ship_id].normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`,
+    title: `${mode} Chart of ${graph.get('link', discord_id).name}'s ${graph.get('ship_id')[ship_id].normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`,
     xaxis: {
       dtick: 1,
     }
@@ -251,20 +271,7 @@ async function sendGraph(discord_id, shipQuery, isPR = true) {
     format: 'png',
   }
 
-  // plotly.getImage(figure, imgOpts, function(error, imageStream) {
-  //   if (error) return console.log(error)
-  //
-  //   // let fileStream = fs.createWriteStream(`${__dirname}/cmds/graphs/graph.png`)
-  //   let fileStream = fs.createWriteStream('main/cmds/graphs/graph.png')
-  //   imageStream.pipe(fileStream)
-  // })
-  // console.log(JSON.stringify(figure));
-  // console.log(imgOpts);
-
-
   await generateImage(figure, imgOpts)
-  fs.copyFileSync(file1, file2);
-  fs.unlinkSync(file2)
 }
 
 function generateImage(figure, imgOpts) {
@@ -290,10 +297,11 @@ async function main() {
 
 // main()
 module.exports.init = initHandler
+module.exports.initId = init
 module.exports.graph = sendGraph
 module.exports.update = updateHandler
 module.exports.debug = debug
-
+module.exports.pr = generatePR
 
 
 

@@ -1,6 +1,13 @@
 const superagent = require('superagent');
 const async = require('async')
 const fs = require('fs')
+const Enmap = require("enmap");
+const id = require('./id')
+const pr = require('./graph')
+
+const graph = new Enmap({
+  name: "graph"
+})
 
 const clanSearchApi = 'https://api.worldofwarships.com/wows/clans/list/'
 const memberIdApi = 'https://api.worldofwarships.com/wows/clans/info/'
@@ -9,7 +16,7 @@ const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/jso
 const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = "3e2c393d58645e4e4edb5c4033c56bd8"
 
-async function memberStats(clanQuery, shipQuery) {
+async function memberStats(clanQuery, shipQuery, isCompact) {
 
   var shipsJson = fs.readFileSync(`${__dirname}/../utility/ships.json`)
 
@@ -25,7 +32,7 @@ async function memberStats(clanQuery, shipQuery) {
     search: clanQuery
   })
 
-  // console.log(clanId.body.data[0].clan_id)
+  if (!clanId.body.data[0]) throw new Error('Please enter an actual clan.')
 
   let memberRequest = await superagent.get(memberIdApi).query({
     application_id: apikey,
@@ -38,24 +45,12 @@ async function memberStats(clanQuery, shipQuery) {
 
   // console.log(members);
 
-  var shipId
-  var shipName
-  if (map.has(shipQuery)) {
-    shipId = map.get(shipQuery)
-  } else {
-    let keyArray = Array.from(map.keys())
-    for (var i = 0; i < keyArray.length; i++) {
-      if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
-        shipId = map.get(keyArray[i])
-        shipName = keyArray[i]
-        console.log(keyArray[i])
-        break
-      }
-    }
-  }
+  var shipData = id.shipid(shipQuery)
 
-  let value = await superagent.get(expectedPrApi)
-  let expectedValues = value.body.data[shipId]
+  if (!shipData.ship_id) throw new Error('Please enter an actual ship.')
+
+  var shipId = shipData.ship_id
+  var shipName = shipData.ship_name
 
   let prMap = new Map()
   let arr = new Array();
@@ -79,19 +74,11 @@ async function memberStats(clanQuery, shipQuery) {
 
     if (data.battles == 0) continue
 
-    let rWins = (data.wins / data.battles) / (expectedValues.win_rate / 100)
-    let rFrags = (data.frags / data.battles) / expectedValues.average_frags
-    let rDmg = data.damage_dealt / data.battles / expectedValues.average_damage_dealt
-
-    let nDmg = Math.max(0, (rDmg - 0.4) / (1 - 0.4))
-    let nFrags = Math.max(0, (rFrags - 0.1) / (1 - 0.1))
-    let nWins = Math.max(0, (rWins - 0.7) / (1 - 0.7))
-
-    let PR = 700 * nDmg + 300 * nFrags + 150 * nWins
+    let PR = await pr.pr(data, shipId)
 
     let arr2 = {
       name: memberName.body.data[members[i]].nickname,
-      pr: Math.round(PR),
+      pr: PR,
       battles: data.battles,
       dmg: Math.round(data.damage_dealt / data.battles),
       kills: Math.round((data.frags / data.battles) * 100) / 100,
@@ -116,16 +103,28 @@ async function memberStats(clanQuery, shipQuery) {
   });
 
   let field = []
+  let description = ''
   for (let i = 0; i < Math.min(10, arr.length); i++) {
-    field.push({
-      name: `${i + 1}.  ${arr[i].name}`,
-      value: `PR:  ${arr[i].pr}\n Battles: ${arr[i].battles}\nDamage: ${arr[i].dmg}\nKills: ${arr[i].kills}\nWinrate: ${arr[i].wr}%`,
-    })
+    if (isCompact) {
+      description += `**${i + 1}**. ${arr[i].name} (${arr[i].pr} pr over ${arr[i].battles} games)\n`
+    } else {
+      field.push({
+        name: `${i + 1}.  ${arr[i].name}`,
+        value: `PR:  ${arr[i].pr}\n Battles: ${arr[i].battles}\nDamage: ${arr[i].dmg}\nKills: ${arr[i].kills}\nWinrate: ${arr[i].wr}%`,
+      })
+    }
   }
-
-  let em = {
-    title: `Clan: ${clanTag}\nShip: ${shipName}`,
-    fields: field
+  let em
+  if (isCompact) {
+    em = {
+      title: `Clan: ${clanTag}            Ship: ${shipName}`,
+      description: description
+    }
+  } else {
+    em = {
+      title: `Clan: ${clanTag}            Ship: ${shipName}`,
+      fields: field
+    }
   }
 
   return em;

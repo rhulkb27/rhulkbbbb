@@ -1,4 +1,6 @@
-require('dotenv').config({path: __dirname + '/../.env'});
+require('dotenv').config({
+  path: __dirname + '/../.env'
+});
 
 const {
   Client,
@@ -31,16 +33,15 @@ bot.on('message', async message => {
   switch (command) {
 
     case 'm':
-
-      var data = await memberStats.memberStats(args[0], args[1])
-      // var text = ''
-      // for (let i = 0; i < Math.min(15, data.size); i++) {
-      //   text += `${Array.from(data)[i][0]}: ${Array.from(data)[i][1]}\n`
-      // }
-      // message.channel.send(text)
-      message.channel.send({
-        embed: data
-      })
+      try {
+        let mode = args[2] == 'c' ? true : false
+        var data = await memberStats.memberStats(args[0], args[1], mode)
+        message.channel.send({
+          embed: data
+        })
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'h':
@@ -55,21 +56,28 @@ bot.on('message', async message => {
       break
 
     case 'g':
-      // linux
-      // const file = 'main/cmds/graphs/graph.png'
-
-      // mac
+    case 'graph':
       const file = './graph.png'
 
       var user = message.author
       var shipQuery = args[0]
       if (args[1]) {
-        user = getUserFromMention(args[0])
-        shipQuery = args[1]
+        try {
+          user = getUserFromMention(args[0])
+          shipQuery = args[1]
+        } catch (err) {
+          message.channel.send(err.message)
+          break
+        }
       }
-      await graph.graph(user.id, shipQuery)
-      const attachment = new Attachment(file)
-      message.channel.send('', attachment)
+      try {
+        let mode = args[2] == 'wr' ? false : true
+        await graph.graph(user.id, shipQuery, mode)
+        const attachment = new Attachment(file)
+        message.channel.send('', attachment)
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'u':
@@ -124,8 +132,9 @@ function getUserFromMention(mention) {
     if (mention.startsWith('!')) {
       mention = mention.slice(1)
     }
-
     return bot.users.get(mention)
+  } else {
+    throw new Error('Please enter an actual user')
   }
 }
 
