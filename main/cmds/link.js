@@ -22,7 +22,7 @@ function listLinks() {
 }
 
 function clear() {
-  let clear = graph.observable('link')
+  let clear = graph.observe('link')
   clear = {}
 }
 
