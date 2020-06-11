@@ -91,7 +91,7 @@ class ShipStats {
       point.battles += this.games_list[i].battles
       let wr = point.wins / point.battles
       graph[0].x.push(point.battles)
-      graph[0].y.push(wr)
+      graph[0].y.push(wr * 100)
     }
     return graph
   }
