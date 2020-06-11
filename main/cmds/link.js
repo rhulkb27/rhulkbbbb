@@ -10,7 +10,7 @@ const graph = new Enmap({
 async function link(discord_id, username) {
   let playerid = await id.id(username)
   graph.set('link', {
-    id: playerid.data['account_id'],
+    id: playerid.data['account_id'].toString(),
     name: playerid.data['nickname']
   }, discord_id)
   update.initId(playerid.data['account_id'], discord_id)
