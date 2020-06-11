@@ -197,7 +197,7 @@ async function init(playerid, discord_id) {
   // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
   // let playerstats = JSON.parse(testData)
 
-  // if (!graph.has(playerid.toString())) {
+  if (!graph.has(playerid.toString())) {
 
     let playerstats = await superagent.get(userDataApi).query({
       application_id: apikey,
@@ -216,7 +216,7 @@ async function init(playerid, discord_id) {
         playerstats[i].ship_id)
     }
     console.log('Done!')
-  // }
+  }
 }
 
 async function sendGraph(discord_id, shipQuery, isPR) {
