@@ -24,8 +24,6 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
 
   var map = new Map(Object.entries(shipData))
 
-  // console.log(map)
-
   let clanId = await superagent.get(clanSearchApi).query({
     application_id: apikey,
     fields: 'clan_id',
@@ -122,7 +120,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     }
   } else {
     em = {
-      title: `Clan: ${clanTag}            Ship: ${shipName}`,
+      title: `Clan: ${clanTag}\nShip: ${shipName}`,
       fields: field
     }
   }

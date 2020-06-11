@@ -15,6 +15,7 @@ const history = require('./cmds/history')
 const graph = require('./cmds/graph')
 const id = require('./cmds/id')
 const link = require('./cmds/link')
+const help = require('./cmds/help')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
@@ -32,7 +33,14 @@ bot.on('message', async message => {
 
   switch (command) {
 
-    case 'm':
+    case 'help':
+      message.channel.send({
+        embed: help.help()
+      })
+      break
+
+    case 'ct':
+    case 'clantop':
       try {
         let mode = args[2] == 'c' ? true : false
         var data = await memberStats.memberStats(args[0], args[1], mode)
@@ -57,23 +65,23 @@ bot.on('message', async message => {
 
     case 'g':
     case 'graph':
-      const file = './graph.png'
-
       var user = message.author
       var shipQuery = args[0]
+      var mode = args[1]
       if (args[1]) {
+        shipQuery = args[1]
+        mode = args[2]
         try {
-          user = getUserFromMention(args[0])
-          shipQuery = args[1]
+          user = getUserFromMention(args[0]).id
         } catch (err) {
-          message.channel.send(err.message)
-          break
+          user = {
+            username: args[0]
+          }
         }
       }
       try {
-        let mode = args[2] == 'wr' ? false : true
-        await graph.graph(user.id, shipQuery, mode)
-        const attachment = new Attachment(file)
+        await graph.graph(user, shipQuery, mode)
+        const attachment = new Attachment('./graph.png')
         message.channel.send('', attachment)
       } catch (err) {
         message.channel.send(err.message)
@@ -83,6 +91,7 @@ bot.on('message', async message => {
     case 'u':
     case 'update':
       graph.update()
+      message.channel.send('Stats have been updated.')
       break
 
     case 'init':
@@ -115,10 +124,10 @@ bot.on('message', async message => {
       message.channel.send(link.listLinks())
       break
 
-    case 'clear':
-      link.clear()
-      break
-      
+      // case 'clear':
+      //   link.clear()
+      //   break
+
     case 'debug':
     case 'listGraph':
       graph.debug(args[0])

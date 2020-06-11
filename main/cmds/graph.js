@@ -6,9 +6,7 @@ const Enmap = require("enmap");
 const shipGenerator = require(`${__dirname}/../utility/shipGenerator`)
 const cron = require('cron')
 const plotly = require('plotly')('Shadow_Storm419', 'TxSRgxqeDWdxtwTxzt2H')
-
-const file1 = './graph.png'
-const file2 = './test.png'
+const id = require('./id')
 
 const graph = new Enmap({
   name: "graph"
@@ -18,9 +16,7 @@ const userDataApi = 'https://api.worldofwarships.com/wows/ships/stats/'
 const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/json/'
 const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
-const id = 1023637668
 
-// var userIds = [id]
 var userIds = Object.values(graph.get('link'))
 console.log(graph.get('link'));
 
@@ -29,14 +25,6 @@ class ShipStats {
     this.games_list = games_list
     this.all_stats = all_stats
     this.last_battle_time = last_battle_time
-  }
-
-  getGames() {
-    return this.games_list
-  }
-
-  getlast_battle_time() {
-    return this.last_battle_time
   }
 
   updateStats(updated_stats, last_battle_time) {
@@ -76,7 +64,7 @@ class ShipStats {
     return graph
   }
 
-  getWRGraph() {
+  getOtherGraph(mode) {
     var graph = [{
       x: [],
       y: [],
@@ -84,16 +72,33 @@ class ShipStats {
     }]
     var point = {
       battles: 0,
-      wins: 0
+      data: 0
+    }
+    let finder
+    let titlemode
+    switch (mode) {
+      case 'dmg':
+        finder = 'damage_dealt'
+        titlemode = 'Avg DMG'
+        break
+      case 'wr':
+        finder = 'wins'
+        titlemode = 'WR'
+        break
+      case 'kills':
+        finder = 'frags'
+        titlemode = 'Avg Kills'
+        break
     }
     for (var i = 0; i < this.games_list.length; i++) {
-      point.wins += this.games_list[i].wins
+      point.data += this.games_list[i][finder]
       point.battles += this.games_list[i].battles
-      let wr = point.wins / point.battles
+      let percentMultiplier = mode == 'wr' ? 100 : 1
+      let data = point.data / point.battles * percentMultiplier
       graph[0].x.push(point.battles)
-      graph[0].y.push(wr * 100)
+      graph[0].y.push(data)
     }
-    return graph
+    return [graph, titlemode]
   }
 
   static cast(object) {
@@ -111,19 +116,12 @@ async function updateHandler() {
 }
 
 async function initHandler() {
-
   await shipGenerator.shipGenerator()
 
   let expected_values = await superagent.get(expectedPrApi)
   expected_values = expected_values.body.data
 
   graph.set('expected_values', expected_values)
-
-  // userIds = Object.values(graph.get('link'))
-  // console.log(graph.get('link'))
-  // for (var i = 0; i < userIds.length; i++) {
-  //   init(userIds[i].id)
-  // }
 }
 
 function debug(key) {
@@ -142,10 +140,6 @@ async function update(playerid) {
 
   updated_stats = updated_stats.body.data[playerid]
 
-  // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
-  //
-  // let updaed = JSON.parse(testData)
-
   let stats
 
   for (var i = 0; i < updated_stats.length; i++) {
@@ -161,18 +155,10 @@ async function update(playerid) {
       graph.set(playerid, prevShipStats, updated_stats[i].ship_id)
     }
   }
-
-  // for (var i = 0; i < updated_stats.length; i++) {
-  //   if (prevStats[updated_stats[i].ship_id].getlast_battle_time() < updated_stats[i].last_battle_time) {
-  //     stats = new ShipStats(prevStats[shipTimeList[i].ship_id), shipTimeList[i].pvp)
-  //     stats.updateStats(updated[i].pvp, updated[i].last_battle_time)
-  //   }
-  // }
-
 }
 
 async function generatePR(data, ship_id) {
-  let ship_expected_values = graph.get('expected_values', ship_id)
+  let ship_expected_values = graph.get('expected_values', ship_id.ship_id)
 
   let rWins = (data.wins / data.battles) / (ship_expected_values.win_rate / 100)
   let rFrags = (data.frags / data.battles) / ship_expected_values.average_frags
@@ -219,45 +205,66 @@ async function init(playerid, discord_id) {
   }
 }
 
-async function sendGraph(discord_id, shipQuery, isPR) {
+async function sendGraph(discord_id, shipQuery, mode) {
 
-  // throw an error if the player is not linked
-  if (!graph.has('link', discord_id)) throw new Error('Player is not linked.')
+  let player_id
+  let player_name
 
-  let player_id = (graph.get('link', discord_id)).id
+  console.log(discord_id);
 
-  var ship_id
-  let shipData = graph.get('name_to_id')
-  if (shipData.hasOwnProperty(shipQuery)) {
-    ship_id = shipData[shipQuery]
-  } else {
-    let keyArray = Object.keys(shipData)
-    for (var i = 0; i < keyArray.length; i++) {
-      if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
-        ship_id = shipData[keyArray[i]]
-        console.log(keyArray[i])
+  if (typeof discord_id === 'object') {
+    let check = false
+    player_id = (await id.id(discord_id.username)).data
+    let players = graph.get('link')
+    for (const playerData in players) {
+      if (player_id.account_id == players[playerData].id) {
+        check = true
         break
       }
     }
+    if (!check) throw new Error(`${player_id.nickname} is not on the database`)
+    player_name = player_id.nickname
+    player_id = player_id.account_id
+  } else {
+
+    // throw an error if the player is not linked
+    if (!graph.has('link', discord_id)) throw new Error('Player is not linked.')
+
+    player_id = graph.get('link', discord_id)
+    player_name = player_id.name
+    player_id = player_id.id
   }
 
+  let ship_id = id.shipid(shipQuery)
+
+  // throw an error if the entered ship does not exist
   if (!ship_id) throw new Error('Please enter an actual ship u big dumb')
 
   // throw an error if player does not have any games in the specified ship
-  if (!graph.has(player_id, ship_id)) throw new Error('Player does not have any games in the specified ship.')
+  if (!graph.has(player_id, ship_id.ship_id)) throw new Error('Player does not have any games in the specified ship.')
 
   let trace
 
-  if (isPR) {
-    trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getPRGraph(ship_id)
+  console.log(graph.get(player_id, ship_id.ship_id));
+
+  let titlemode
+
+  if (!mode) {
+    trace = await (ShipStats.cast(graph.get(player_id, ship_id.ship_id))).getPRGraph(ship_id)
+    titlemode = 'PR'
   } else {
-    trace = await (ShipStats.cast(graph.get(player_id, ship_id))).getWRGraph(ship_id)
+    if (['wr', 'kills', 'dmg'].includes(mode)) {
+      trace = await (ShipStats.cast(graph.get(player_id, ship_id.ship_id))).getOtherGraph(mode)
+      titlemode = trace[1]
+      trace = trace[0]
+    } else {
+      throw new Error('Please enter an accepted mode (wr, kills, dmg)')
+    }
   }
 
-  let mode = isPR ? 'PR' : 'WR'
 
   var layout = {
-    title: `${mode} Chart of ${graph.get('link', discord_id).name}'s ${graph.get('ship_id')[ship_id].normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`,
+    title: `${titlemode} Chart of ${player_name}'s ${ship_id.ship_name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`,
     xaxis: {
       dtick: 1,
     }
@@ -279,7 +286,7 @@ function generateImage(figure, imgOpts) {
   return new Promise((resolve, reject) => {
     plotly.getImage(figure, imgOpts, (err, imageStream) => {
       if (err) return reject(err);
-      var fileStream = fs.createWriteStream(file1);
+      var fileStream = fs.createWriteStream('./graph.png');
       imageStream.pipe(fileStream);
       fileStream.on('error', reject);
       fileStream.on('finish', resolve);
@@ -287,69 +294,9 @@ function generateImage(figure, imgOpts) {
   })
 }
 
-async function main() {
-  // await init(id)
-  // await update(id)
-  // await test()
-  // const job = cron.job('*/20 * * * *', () => updateHandler())
-  // job.start()
-  // sendGraph()
-}
-
-// main()
 module.exports.init = initHandler
 module.exports.initId = init
 module.exports.graph = sendGraph
 module.exports.update = updateHandler
 module.exports.debug = debug
 module.exports.pr = generatePR
-
-
-
-
-
-
-async function test() {
-  let test = await (ShipStats.cast(graph.get(id, '4076746192'))).getPRGraph(4076746192)
-  console.log(test)
-
-  // let memberRequest = await superagent.get(userDataApi).query({
-  //   application_id: apikey,
-  //   account_id: playerid,
-  //   fields: 'last_battle_time, ship_id, pvp.battles, pvp.damage_dealt, pvp.wins, pvp.frags'
-  // })
-  //
-  // var updated = memberRequest.body.data[playerid]
-  //
-  // let shipTimeList = JSON.parse(fs.readFileSync(`${__dirname}/../playerData/${playerid}.json`))
-  //
-  // for (var i = 0; i < updated.length; i++) {
-  //   if (Math.floor(Date.now() / 1000) - updated[i].last_battle_time < 1200) {
-  //     let prevStats = playerData.get(shipTimeList[i].ship_id)
-  //     let newStats = updated[i].pvp
-  //     console.log(prevStats)
-  //     if (prevStats) {
-  //       let lastGame = {
-  //         damage_dealt: newStats.damage_dealt - prevStats.damage_dealt,
-  //         wins: newStats.wins - prevStats.wins,
-  //         frags: newStats.frags - prevStats.frags,
-  //         battles: newStats.battles - prevStats.battles
-  //       }
-  //     } else {
-  //       let lastGame = newStats
-  //     }
-  //     console.log(lastGame);
-  // let updated_stats = playerData.get(shipTimeList[i].ship_id)
-  // updated_stats.push(lastGame)
-  // playerData.set(shipTimeList[i].ship_id, updated_stats)
-
-  // playerData.set(shipTimeList[i].ship_id,
-  // console.log(map.get(shipTimeList[i].ship_id.toString()))
-  // console.log(shipTimeList[i].ship_id)
-  //   }
-  // }
-  // console.log(playerData)
-}
-
-// init()
-// update()

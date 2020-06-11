@@ -17,7 +17,7 @@ async function link(discord_id, username) {
   return playerid.data['nickname']
 }
 
-function listLinks() {
+function listLinks() { 
   return JSON.stringify(graph.get('link'))
 }
 
