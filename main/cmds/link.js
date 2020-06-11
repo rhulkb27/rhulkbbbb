@@ -13,7 +13,7 @@ async function link(discord_id, username) {
     id: playerid.data['account_id'].toString(),
     name: playerid.data['nickname']
   }, discord_id)
-  update.initId(playerid.data['account_id'], discord_id)
+  await update.initId(playerid.data['account_id'], discord_id)
   return playerid.data['nickname']
 }
 
