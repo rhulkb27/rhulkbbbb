@@ -113,7 +113,7 @@ bot.on('message', async message => {
     case 'add':
       try {
         var response = await link.link(user.id, name)
-        message.channel.send(`${response} added to database.`)
+        message.channel.send(`\`${response}\` added to database.`)
       } catch (err) {
         message.channel.send(err.message)
       }
@@ -128,7 +128,7 @@ bot.on('message', async message => {
       }
       try {
         var response = await link.link(user.id, name)
-        message.channel.send(`${user} has been linked to ${response}`)
+        message.channel.send(`${user} has been linked to \`${response}\``)
       } catch (err) {
         message.channel.send(err.message)
       }

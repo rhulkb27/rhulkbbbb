@@ -23,13 +23,14 @@ async function add(username) {
 async function link(discord_id, username) {
   let playerid
   try {
-    playerid = await id.id(username)
+    playerid = (await id.id(username)).data
   } catch (err) {
     throw new Error('Please enter a valid username.')
   }
-  data.enmap.set('link', playerid.data['account_id'], discord_id)
+  if (!data.enmap.get('ids').includes(playerid.account_id)) throw new Error(`\`${playerid.nickname}\` is not in the database.`)
+  data.enmap.set('link', playerid.account_id, discord_id)
   console.log(data.enmap.get('link'))
-  return playerid.data['nickname']
+  return playerid.nickname
 }
 
 function listLinks() {
