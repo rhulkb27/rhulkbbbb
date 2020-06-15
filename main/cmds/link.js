@@ -33,8 +33,21 @@ async function link(discord_id, username) {
   return playerid.nickname
 }
 
+async function importUsers(users) {
+  users = JSON.parse(users)
+  Object.keys(users).forEach(function(item) {
+    if (!users[item]) return
+    data.enmap.push('ids', users[item].id)
+    data.enmap.push('usernames', users[item].name)
+    update.initId(users[item].id)
+  })
+}
+
 function listLinks() {
-  return JSON.stringify(data.enmap.get('link'))
+  return JSON.stringify({
+      ids: data.enmap.get('ids'),
+      names: data.enmap.get('usernames')
+  })
 }
 
 function clear() {
@@ -43,5 +56,6 @@ function clear() {
 
 exports.add = add
 exports.link = link
+exports.importUsers = importUsers
 exports.listLinks = listLinks
 exports.clear = clear

@@ -111,12 +111,12 @@ bot.on('message', async message => {
 
     case 'a':
     case 'add':
-      try {
-        var response = await link.link(user.id, name)
+      // try {
+        var response = await link.add(args[0])
         message.channel.send(`\`${response}\` added to database.`)
-      } catch (err) {
-        message.channel.send(err.message)
-      }
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
       break
 
     case 'link':
@@ -139,6 +139,10 @@ bot.on('message', async message => {
       message.channel.send(link.listLinks())
       break
 
+    case 'i':
+    case 'import':
+      link.importUsers(args[0])
+      break
       // case 'clear':
       //   link.clear()
       //   break
