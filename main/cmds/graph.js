@@ -103,7 +103,7 @@ class ShipStats {
 }
 
 async function updateHandler() {
-  console.log('Updating...');
+  console.log('Updating...                                ' + new Date);
   let idList = data.enmap.get('ids')
   for (var i = 0; i < idList.length; i++) {
     await update(idList[i])

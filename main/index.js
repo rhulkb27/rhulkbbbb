@@ -21,7 +21,9 @@ const test = require('./cmds/test')
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
   graph.init()
+  const initStats = cron.job('0 3 * * *', () => graph.init())
   const updateStats = cron.job('*/10 * * * *', () => graph.update())
+  initStats.start()
   updateStats.start()
 });
 
