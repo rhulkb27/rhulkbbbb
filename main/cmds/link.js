@@ -35,11 +35,11 @@ async function link(discord_id, username) {
 
 async function importUsers(users) {
   users = JSON.parse(users)
-  Object.keys(users).forEach(function(item) {
+  Object.keys(users).forEach(async function(item) {
     if (!users[item]) return
     data.enmap.push('ids', users[item].id)
     data.enmap.push('usernames', users[item].name)
-    update.initId(users[item].id)
+    await update.initId(users[item].id)
   })
 }
 
