@@ -1,5 +1,6 @@
 const Enmap = require("enmap");
 
-module.exports.graph = new Enmap({
-  name: "graph"
+module.exports.enmap = new Enmap({
+  name: "enmap",
+  ensureProps: true
 })

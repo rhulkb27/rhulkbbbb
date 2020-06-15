@@ -16,12 +16,13 @@ const graph = require('./cmds/graph')
 const id = require('./cmds/id')
 const link = require('./cmds/link')
 const help = require('./cmds/help')
+const test = require('./cmds/test')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
   graph.init()
-  const job = cron.job('*/10 * * * *', () => graph.update())
-  job.start()
+  const updateStats = cron.job('*/10 * * * *', () => graph.update())
+  updateStats.start()
 });
 
 bot.on('message', async message => {
@@ -79,13 +80,13 @@ bot.on('message', async message => {
           }
         }
       }
-      try {
+      // try {
         await graph.graph(user, shipQuery, mode)
         const attachment = new Attachment('./graph.png')
         message.channel.send('', attachment)
-      } catch (err) {
-        message.channel.send(err.message)
-      }
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
       break
 
     case 'u':
@@ -106,6 +107,16 @@ bot.on('message', async message => {
     case 'shipid':
       let shipid = await id.shipid(args[0])
       message.channel.send(`${shipid.ship_name}: ${shipid.ship_id}`)
+      break
+
+    case 'a':
+    case 'add':
+      try {
+        var response = await link.link(user.id, name)
+        message.channel.send(`${response} added to database.`)
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'link':
@@ -135,6 +146,9 @@ bot.on('message', async message => {
     case 'debug':
     case 'listGraph':
       graph.debug(args[0])
+      break
+    case 'test':
+      test.test()
       break
   }
 

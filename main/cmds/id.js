@@ -21,20 +21,19 @@ async function idGetter(search) {
 function shipid(shipQuery) {
   var ship_id
   var keyArray
-  let shipData = data.graph.get('name_to_id')
-  if (shipData.hasOwnProperty(shipQuery)) {
-    ship_id = shipData[shipQuery]
-  } else {
-    keyArray = Object.keys(shipData)
-    for (var i = 0; i < keyArray.length; i++) {
-      if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
-        ship_id = shipData[keyArray[i]]
-        console.log(keyArray[i])
-        break
-      }
+  let shipData = data.enmap.get('name_to_id')
+  keyArray = Object.keys(shipData)
+  for (var i = 0; i < keyArray.length; i++) {
+    if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(shipQuery.toLowerCase())) {
+      ship_id = shipData[keyArray[i]]
+      console.log(keyArray[i])
+      break
     }
   }
-  return {ship_id: ship_id, ship_name: keyArray[i]}
+  return {
+    ship_id: ship_id,
+    ship_name: keyArray[i]
+  }
 }
 
 module.exports.id = idGetter

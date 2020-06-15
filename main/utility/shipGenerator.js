@@ -29,10 +29,10 @@ async function handler() {
       [key]: value
     })
   ), {})
-  data.graph.set('name_to_id', obj)
-  data.graph.set('ship_id', _.invert(obj))
-  // console.log(data.graph.get('ship_id'));
-  // console.log(data.graph.get('name_to_id'));
+  data.enmap.set('name_to_id', obj)
+  data.enmap.set('ship_id', _.invert(obj))
+  // console.log(data.enmap.get('ship_id'));
+  // console.log(data.enmap.get('name_to_id'));
 }
 
 module.exports.shipGenerator = handler;

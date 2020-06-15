@@ -14,8 +14,7 @@ const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/jso
 const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 
-var userIds = Object.values(data.graph.get('link'))
-console.log(data.graph.get('link'));
+// console.log(data.enmap.get('link'));
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
@@ -26,7 +25,7 @@ class ShipStats {
 
   updateStats(updated_stats, last_battle_time) {
     this.last_battle_time = last_battle_time
-    if (updated_stats.battles == this.all_stats.battles) return
+    if (updated_stats.battles == this.all_stats.battles) return console.log('No new games played in randoms.')
     var newStatBlock = {
       damage_dealt: updated_stats.damage_dealt - this.all_stats.damage_dealt,
       wins: updated_stats.wins - this.all_stats.wins,
@@ -90,8 +89,8 @@ class ShipStats {
     for (var i = 0; i < this.games_list.length; i++) {
       point.data += this.games_list[i][finder]
       point.battles += this.games_list[i].battles
-      let percentMultiplier = mode == 'wr' ? 100 : 1
-      let data = point.data / point.battles * percentMultiplier
+      let data = point.data / point.battles
+      if (mode == 'wr') data *= 100
       graph[0].x.push(point.battles)
       graph[0].y.push(data)
     }
@@ -105,9 +104,9 @@ class ShipStats {
 
 async function updateHandler() {
   console.log('Updating...');
-  userIds = Object.values(data.graph.get('link'))
-  for (var i = 0; i < userIds.length; i++) {
-    await update(userIds[i].id)
+  let idList = data.enmap.get('ids')
+  for (var i = 0; i < idList.length; i++) {
+    await update([i])
   }
   console.log('Done!');
 }
@@ -118,16 +117,16 @@ async function initHandler() {
   let expected_values = await superagent.get(expectedPrApi)
   expected_values = expected_values.body.data
 
-  data.graph.set('expected_values', expected_values)
+  data.enmap.set('expected_values', expected_values)
 }
 
 function debug(key) {
-  console.log(data.graph.get(key.toString()))
+  console.log(data.enmap.get(key))
 }
 
 async function update(playerid) {
 
-  let prevStats = await data.graph.get(playerid)
+  let prevStats = await data.enmap.get(playerid)
 
   let updated_stats = await superagent.get(userDataApi).query({
     application_id: apikey,
@@ -137,25 +136,23 @@ async function update(playerid) {
 
   updated_stats = updated_stats.body.data[playerid]
 
-  let stats
-
   for (var i = 0; i < updated_stats.length; i++) {
+    if (!prevStats[updated_stats[i].ship_id]) {
+      data.enmap.set(playerid, new ShipStats([updated_stats[i].pvp], updated_stats[i].pvp, updated_stats[i].last_battle_time),
+        updated_stats[i].ship_id)
+      continue
+    }
     if (prevStats[updated_stats[i].ship_id].last_battle_time < updated_stats[i].last_battle_time) {
-      let prevShipStats = data.graph.get(playerid, updated_stats[i].ship_id)
+      let prevShipStats = data.enmap.get(playerid, updated_stats[i].ship_id)
       prevShipStats = ShipStats.cast(prevShipStats)
-      if (!prevShipStats) {
-        data.graph.set(playerid, new ShipStats([updated_stats[i].pvp], updated_stats[i].pvp, updated_stats[i].last_battle_time),
-          updated_stats[i].ship_id)
-        continue
-      }
       prevShipStats.updateStats(updated_stats[i].pvp, updated_stats[i].last_battle_time)
-      data.graph.set(playerid, prevShipStats, updated_stats[i].ship_id)
+      data.enmap.set(playerid, prevShipStats, updated_stats[i].ship_id)
     }
   }
 }
 
 async function generatePR(player_stats, ship_id) {
-  let ship_expected_values = data.graph.get('expected_values', ship_id)
+  let ship_expected_values = data.enmap.get('expected_values', ship_id)
 
   let rWins = (player_stats.wins / player_stats.battles) / (ship_expected_values.win_rate / 100)
   let rFrags = (player_stats.frags / player_stats.battles) / ship_expected_values.average_frags
@@ -172,15 +169,15 @@ async function generatePR(player_stats, ship_id) {
 
 
 
-async function init(playerid, discord_id) {
+async function init(playerid) {
 
-  // data.graph.clear()
+  // data.enmap.clear()
 
   // test data
   // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
   // let playerstats = JSON.parse(testData)
 
-  if (!data.graph.has(playerid.toString())) {
+  if (!data.enmap.has(playerid)) {
 
     let playerstats = await superagent.get(userDataApi).query({
       application_id: apikey,
@@ -192,10 +189,10 @@ async function init(playerid, discord_id) {
 
     console.log(`Adding new stats...`)
 
-    data.graph.set(playerid.toString(), {})
+    data.enmap.set(playerid, {})
 
     for (var i = 0; i < playerstats.length; i++) {
-      data.graph.set(playerid.toString(), new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
+      data.enmap.set(playerid, new ShipStats([playerstats[i].pvp], playerstats[i].pvp, playerstats[i].last_battle_time),
         playerstats[i].ship_id)
     }
     console.log('Done!')
@@ -207,30 +204,22 @@ async function sendGraph(discord_id, shipQuery, mode) {
   let player_id
   let player_name
 
-  console.log(discord_id);
-
   if (typeof discord_id === 'object') {
     let check = false
     player_id = (await id.id(discord_id.username)).data
-    let players = data.graph.get('link')
-    for (const playerData in players) {
-      console.log({first: player_id.account_id, second: players[playerData].id});
-      if (player_id.account_id == players[playerData].id) {
-        check = true
-        break
-      }
-    }
-    if (!check) throw new Error(`${player_id.nickname} is not on the database`)
+    let players = data.enmap.get('ids')
+    let index = players.includes(player_id)
+    if (index == -1) throw new Error(`${player_id.nickname} is not on the database`)
     player_name = player_id.nickname
     player_id = player_id.account_id
   } else {
-    console.log(data.graph.get('link', discord_id))
     // throw an error if the player is not linked
-    if (!data.graph.has('link', discord_id)) throw new Error('Player is not linked.')
+    if (!data.enmap.has('link', discord_id)) throw new Error('Player is not linked.')
 
-    player_id = data.graph.get('link', discord_id)
-    player_name = player_id.name
-    player_id = player_id.id
+    player_id = data.enmap.get('link', discord_id)
+    let players = data.enmap.get('ids')
+    let usernames = data.enmap.get('usernames')
+    player_name = usernames[players.indexOf(player_id)]
   }
 
   let ship_id = id.shipid(shipQuery)
@@ -239,20 +228,20 @@ async function sendGraph(discord_id, shipQuery, mode) {
   if (!ship_id) throw new Error('Please enter an actual ship u big dumb')
 
   // throw an error if player does not have any games in the specified ship
-  if (!data.graph.has(player_id, ship_id.ship_id)) throw new Error('Player does not have any games in the specified ship.')
+  if (!data.enmap.has(player_id, ship_id.ship_id)) throw new Error('Player does not have any games in the specified ship.')
 
   let trace
 
-  console.log(data.graph.get(player_id, ship_id.ship_id));
+  console.log(data.enmap.get(player_id, ship_id.ship_id));
 
   let titlemode
 
   if (!mode || mode.toLowerCase() == 'pr') {
-    trace = await (ShipStats.cast(data.graph.get(player_id, ship_id.ship_id))).getPRGraph(ship_id.ship_id)
+    trace = await (ShipStats.cast(data.enmap.get(player_id, ship_id.ship_id))).getPRGraph(ship_id.ship_id)
     titlemode = 'PR'
   } else {
     if (['wr', 'kills', 'dmg'].includes(mode.toLowerCase())) {
-      trace = await (ShipStats.cast(data.graph.get(player_id, ship_id.ship_id))).getOtherGraph(mode)
+      trace = await (ShipStats.cast(data.enmap.get(player_id, ship_id.ship_id))).getOtherGraph(mode)
       titlemode = trace[1]
       trace = trace[0]
     } else {
@@ -292,9 +281,9 @@ function generateImage(figure, imgOpts) {
   })
 }
 
-module.exports.init = initHandler
-module.exports.initId = init
-module.exports.graph = sendGraph
-module.exports.update = updateHandler
-module.exports.debug = debug
-module.exports.pr = generatePR
+exports.init = initHandler
+exports.initId = init
+exports.graph = sendGraph
+exports.update = updateHandler
+exports.debug = debug
+exports.pr = generatePR
