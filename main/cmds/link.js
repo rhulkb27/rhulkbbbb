@@ -23,7 +23,8 @@ async function add(username) {
 async function link(discord_id, username) {
   let playerid
   try {
-    playerid = (await id.id(username)).data
+    playerid = await id.id(username)
+    playerid = playerid.data
   } catch (err) {
     throw new Error('Please enter a valid username.')
   }
