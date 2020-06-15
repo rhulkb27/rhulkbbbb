@@ -24,7 +24,7 @@ function shipid(shipQuery) {
   let shipData = data.enmap.get('name_to_id')
   keyArray = Object.keys(shipData)
   for (var i = 0; i < keyArray.length; i++) {
-    if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().includes(shipQuery.toLowerCase())) {
+    if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g,'').replace('-','').toLowerCase().includes(shipQuery.toLowerCase())) {
       ship_id = shipData[keyArray[i]]
       console.log(keyArray[i])
       break
