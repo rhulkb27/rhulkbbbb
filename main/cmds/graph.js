@@ -205,11 +205,11 @@ async function sendGraph(discord_id, shipQuery, mode) {
   let player_name
 
   if (typeof discord_id === 'object') {
-    let check = false
-    player_id = (await id.id(discord_id.username)).data
+    player_id = await id.id(discord_id.username)
+    player_id = player_id.data
     let players = data.enmap.get('ids')
-    let index = players.includes(player_id)
-    if (!index) throw new Error(`${player_id.nickname} is not on the database`)
+    console.log({player_id, players});
+    if (players.includes(player_id)) throw new Error(`${player_id.nickname} is not on the database`)
     player_name = player_id.nickname
     player_id = player_id.account_id
   } else {
