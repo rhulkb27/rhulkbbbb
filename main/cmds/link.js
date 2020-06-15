@@ -29,7 +29,6 @@ async function link(discord_id, username) {
   }
   data.enmap.set('link', playerid.data['account_id'], discord_id)
   console.log(data.enmap.get('link'))
-  await update.initId(playerid.data['account_id'])
   return playerid.data['nickname']
 }
 
