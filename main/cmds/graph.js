@@ -103,7 +103,7 @@ class ShipStats {
 }
 
 async function updateHandler() {
-  console.log('Updating...                                ' + new Date);
+  console.log('Updating...                          ' + new Date);
   let idList = data.enmap.get('ids')
   for (var i = 0; i < idList.length; i++) {
     await update(idList[i])
@@ -224,7 +224,8 @@ async function sendGraph(discord_id, shipQuery, mode) {
     player_id = data.enmap.get('link', discord_id)
     let players = data.enmap.get('ids')
     let usernames = data.enmap.get('usernames')
-    player_name = usernames[players.indexOf(player_id)]
+    let index = players.indexOf(player_id.toString()) == -1 ? players.indexOf(player_id) : players.indexOf(player_id.toString())
+    player_name = usernames[index]
   }
 
   let ship_id = id.shipid(shipQuery)

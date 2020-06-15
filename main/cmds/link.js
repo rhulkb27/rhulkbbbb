@@ -28,7 +28,7 @@ async function link(discord_id, username) {
   } catch (err) {
     throw new Error('Please enter a valid username.')
   }
-  if (!data.enmap.get('ids').includes(playerid.account_id)) throw new Error(`\`${playerid.nickname}\` is not in the database.`)
+  if (!data.enmap.get('usernames').includes(playerid.nickname)) throw new Error(`\`${playerid.nickname}\` is not in the database.`)
   data.enmap.set('link', playerid.account_id, discord_id)
   console.log(data.enmap.get('link'))
   return playerid.nickname
