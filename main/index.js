@@ -82,18 +82,18 @@ bot.on('message', async message => {
           }
         }
       }
-      // try {
+      try {
         await graph.graph(user, shipQuery, mode)
         const attachment = new Attachment('./graph.png')
         message.channel.send('', attachment)
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'u':
     case 'update':
-      graph.update()
+      await graph.update()
       message.channel.send('Stats have been updated.')
       break
 
@@ -113,12 +113,12 @@ bot.on('message', async message => {
 
     case 'a':
     case 'add':
-      // try {
+      try {
         var response = await link.add(args[0])
         message.channel.send(`\`${response}\` added to database.`)
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'link':
