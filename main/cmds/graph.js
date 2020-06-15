@@ -106,7 +106,7 @@ async function updateHandler() {
   console.log('Updating...');
   let idList = data.enmap.get('ids')
   for (var i = 0; i < idList.length; i++) {
-    await update([i])
+    await update(idList[i])
   }
   console.log('Done!');
 }
