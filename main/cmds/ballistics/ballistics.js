@@ -1,7 +1,3 @@
-const plotly = require('plotly')('Shadow_Storm419', 'TxSRgxqeDWdxtwTxzt2H')
-const fs = require('fs')
-
-
 async function getBallistics(shell_data, range, ship_name) {
 
   // SHELL CONSTANTS //
@@ -78,59 +74,8 @@ async function getBallistics(shell_data, range, ship_name) {
     if (x > kRANGE) break
   }
 
-  let pen_tick = (armor[1] > 500 ? 50 : 25)
+  return {distance, armor, time}
 
-  let figure = {
-    'data': [{
-        x: distance,
-        y: armor,
-        name: 'Penetration',
-        type: 'scatter'
-      },
-      {
-        x: distance,
-        y: time,
-        name: 'Time',
-        yaxis: 'y2',
-        type: 'scatter'
-      }
-    ],
-    layout: {
-      title: `${ship_name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")} Ballistics`,
-      yaxis: {
-        title: 'Penetration',
-        dtick: pen_tick
-      },
-      yaxis2: {
-        title: 'Time',
-        overlaying: 'y',
-        side: 'right'
-      },
-      xaxis: {
-        dtick: 1000,
-      }
-    }
-  }
-
-  let imgOpts = {
-    format: 'png',
-    height: 600,
-    width: 1000
-  }
-
-  await generateImage(figure, imgOpts)
-}
-
-function generateImage(figure, imgOpts, name) {
-  return new Promise((resolve, reject) => {
-    plotly.getImage(figure, imgOpts, (err, imageStream) => {
-      if (err) return reject(err)
-      var fileStream = fs.createWriteStream(`./ballistics.png`)
-      imageStream.pipe(fileStream)
-      fileStream.on('error', reject)
-      fileStream.on('finish', resolve)
-    })
-  })
 }
 
 exports.getBallistics = getBallistics
