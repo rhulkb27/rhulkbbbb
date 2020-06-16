@@ -17,6 +17,7 @@ const id = require('./cmds/id')
 const link = require('./cmds/link')
 const help = require('./cmds/help')
 const test = require('./cmds/test')
+const ballistics = require('./cmds/ballistics/data')
 
 bot.on('ready', () => {
   console.info(`Logged in as ${bot.user.tag}!`);
@@ -42,6 +43,17 @@ bot.on('message', async message => {
       })
       break
 
+    case 'b':
+    case 'ballistics':
+      // try {
+        await ballistics.generateBallisticsGraph(args[0])
+        const attachment = new Attachment('./ballistics.png')
+        message.channel.send('', attachment)
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
+      break
+
     case 'ct':
     case 'clantop':
       try {
@@ -55,7 +67,7 @@ bot.on('message', async message => {
       }
       break
 
-    case 'h':
+    // case 'h':
       // message.channel.startTyping()
       //
       // console.log('' + args[0] + args[1] + args[2]);
@@ -64,7 +76,7 @@ bot.on('message', async message => {
       // message.channel.send({
       //   embed: data
       // })
-      break
+      // break
 
     case 'g':
     case 'graph':
