@@ -368,3 +368,4 @@ function getName(key, ballistics_data) {
 
 exports.generateBallisticsGraph = generateBallisticsGraph
 exports.test = test
+exports.init = init

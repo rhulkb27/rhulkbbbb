@@ -43,6 +43,12 @@ bot.on('message', async message => {
         embed: help.help()
       })
       break
+    case 'loadballistics':
+      console.info('Loading ballistic data...')
+      await ballistics.init()
+      console.info('Done!')
+      message.channel.send('Ballistic data has been loaded.')
+      break
     case 'ballistics-menu':
     case 'bm':
       await ballistics.test(bot, message)
