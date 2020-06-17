@@ -36,6 +36,59 @@ bot.on('message', async message => {
 
   var args = message.content.split(' ').slice(1);
 
+  if (message.author.id == '329081343797624832') {
+    switch (command) {
+      case 'll':
+      case 'listLinks':
+        message.channel.send(link.listLinks())
+        break
+
+      case 'i':
+      case 'import':
+        link.importUsers(args[0])
+        break
+      case 'loadballistics':
+        console.info('Loading ballistic data...')
+        await ballistics.init()
+        console.info('Done!')
+        message.channel.send('Ballistic data has been loaded.')
+        break
+
+      case 'debug':
+      case 'listGraph':
+        graph.debug(args[0])
+        break
+
+      case 'test':
+        test.test()
+        break
+
+      case 'init':
+        graph.init()
+        break
+
+      case 'id':
+        let userid = await id.id(args[0])
+        message.channel.send(userid.response)
+        break
+
+      case 'shipid':
+        let shipid = await id.shipid(args[0])
+        message.channel.send(`${shipid.ship_name}: ${shipid.ship_id}`)
+        break
+
+      case 'a':
+      case 'add':
+        try {
+          var response = await link.add(args[0])
+          message.channel.send(`\`${response}\` added to database.`)
+        } catch (err) {
+          message.channel.send(err.message)
+        }
+        break
+    }
+  }
+
   switch (command) {
 
     case 'help':
@@ -43,22 +96,18 @@ bot.on('message', async message => {
         embed: help.help()
       })
       break
-    case 'loadballistics':
-      console.info('Loading ballistic data...')
-      await ballistics.init()
-      console.info('Done!')
-      message.channel.send('Ballistic data has been loaded.')
-      break
+
     case 'ballistics-menu':
     case 'bm':
       await ballistics.test(bot, message)
       break
+
     case 'b':
     case 'ballistics':
       // try {
-        await ballistics.generateBallisticsGraph(args, true)
-        const attachment = new Discord.MessageAttachment('./ballistics.png')
-        message.channel.send('', attachment)
+      await ballistics.generateBallisticsGraph(args, true)
+      const attachment = new Discord.MessageAttachment('./ballistics.png')
+      message.channel.send('', attachment)
       // } catch (err) {
       //   message.channel.send(err.message)
       // }
@@ -66,33 +115,22 @@ bot.on('message', async message => {
 
     case 'ct':
     case 'clantop':
-      try {
-        let mode = args[2] == 'c' ? true : false
-        var data = await memberStats.memberStats(args[0], args[1], mode)
+      // try {
+        let isCompact = args[2] == 'c' ? true : false
+        let embed = await memberStats.memberStats(args[0], args[1], isCompact)
         message.channel.send({
-          embed: data
+          embed
         })
-      } catch (err) {
-        message.channel.send(err.message)
-      }
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
       break
-
-    // case 'h':
-      // message.channel.startTyping()
-      //
-      // console.log('' + args[0] + args[1] + args[2]);
-      //
-      // var data = await history.history(args[0], args[1], args[2])
-      // message.channel.send({
-      //   embed: data
-      // })
-      // break
 
     case 'g':
     case 'graph':
-      var user = message.author.id
-      var shipQuery = args[0]
-      var mode = args[1]
+      let user = message.author.id
+      let shipQuery = args[0]
+      let mode = args[1]
       if (args[1]) {
         shipQuery = args[1]
         mode = args[2]
@@ -119,64 +157,19 @@ bot.on('message', async message => {
       message.channel.send('Stats have been updated.')
       break
 
-    case 'init':
-      graph.init()
-      break
-
-    case 'id':
-      let userid = await id.id(args[0])
-      message.channel.send(userid.response)
-      break
-
-    case 'shipid':
-      let shipid = await id.shipid(args[0])
-      message.channel.send(`${shipid.ship_name}: ${shipid.ship_id}`)
-      break
-
-    case 'a':
-    case 'add':
-      try {
-        var response = await link.add(args[0])
-        message.channel.send(`\`${response}\` added to database.`)
-      } catch (err) {
-        message.channel.send(err.message)
-      }
-      break
-
     case 'link':
-      var user = message.author
-      var name = args[0]
+      let author = message.author
+      let name = args[0]
       if (args[1]) {
-        user = getUserFromMention(args[0])
+        author = getUserFromMention(args[0])
         name = args[1]
       }
       try {
-        var response = await link.link(user.id, name)
-        message.channel.send(`${user} has been linked to \`${response}\``)
+        let response = await link.link(author.id, name)
+        message.channel.send(`${author} has been linked to \`${response}\``)
       } catch (err) {
         message.channel.send(err.message)
       }
-      break
-
-    case 'll':
-    case 'listLinks':
-      message.channel.send(link.listLinks())
-      break
-
-    case 'i':
-    case 'import':
-      link.importUsers(args[0])
-      break
-      // case 'clear':
-      //   link.clear()
-      //   break
-
-    case 'debug':
-    case 'listGraph':
-      graph.debug(args[0])
-      break
-    case 'test':
-      test.test()
       break
   }
 

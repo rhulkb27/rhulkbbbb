@@ -1,5 +1,6 @@
 const superagent = require('superagent');
 const async = require('async')
+const Discord = require('discord.js');
 const fs = require('fs')
 const id = require('./id')
 const pr = require('./graph')
@@ -69,7 +70,6 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     if (data.battles == 0) continue
 
     let PR = await pr.pr(data, shipId)
-    console.log(PR);
 
     let arr2 = {
       name: memberName.body.data[members[i]].nickname,
@@ -97,6 +97,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     return 0;
   });
 
+
   let field = []
   let description = ''
   for (let i = 0; i < Math.min(10, arr.length); i++) {
@@ -109,20 +110,21 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
       })
     }
   }
-  let em
+
+  let embed = new Discord.MessageEmbed()
+    .setColor('#66ffff')
+
   if (isCompact) {
-    em = {
-      title: `Clan: ${clanTag}              Ship: ${shipName}`,
-      description: description
-    }
+    embed
+      .setTitle(`Clan: ${clanTag}              Ship: ${shipName}`)
+      .setDescription(description)
   } else {
-    em = {
-      title: `Clan: ${clanTag}\nShip: ${shipName}`,
-      fields: field
-    }
+    embed
+      .setTitle(`Clan: ${clanTag}\nShip: ${shipName}`)
+      .addFields(field)
   }
 
-  return em;
+  return embed;
 }
 
 module.exports.memberStats = memberStats;
