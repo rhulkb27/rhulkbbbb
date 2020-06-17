@@ -14,7 +14,7 @@ const expectedPrApi = 'https://api.wows-numbers.com/personal/rating/expected/jso
 const memberNameApi = 'https://api.worldofwarships.com/wows/account/info/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 
-// console.log(data.enmap.get('link'));
+console.log(data.enmap.keyArray());
 
 class ShipStats {
   constructor(games_list, all_stats, last_battle_time) {
