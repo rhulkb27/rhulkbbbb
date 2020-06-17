@@ -23,10 +23,10 @@ const ballistics = require('./cmds/ballistics/data')
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`);
   graph.init()
-  // const initStats = cron.job('0 3 * * *', () => graph.init())
-  // const updateStats = cron.job('*/10 * * * *', () => graph.update())
-  // initStats.start()
-  // updateStats.start()
+  const initStats = cron.job('0 3 * * *', () => graph.init())
+  const updateStats = cron.job('*/10 * * * *', () => graph.update())
+  initStats.start()
+  updateStats.start()
 });
 
 bot.on('message', async message => {
