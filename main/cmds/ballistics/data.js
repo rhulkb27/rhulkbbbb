@@ -62,6 +62,7 @@ async function recusiveTest(client, message, author, ship_list) {
       for (var i = 0; i < ship_list.length; i++) {
         embed.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
       }
+      embed.addField('Info', '📎: add ship\n📈: graph ballistics of added ships\n🚫: close menu')
       await message.edit({
         embed
       })
@@ -69,12 +70,20 @@ async function recusiveTest(client, message, author, ship_list) {
       break
     case '📈':
       console.log('Generating ballistics graph...')
-      console.log(ship_list)
+      let loadingMenu = new Discord.MessageEmbed()
+        .setColor('#6a0dad')
+        .setTitle('Ballistics Graph Creation Menu')
+        .setDescription('Generating ballistics graph...')
+        .setTimestamp()
+      await message.edit({
+        embed: loadingMenu
+      })
       await generateBallisticsGraph(ship_list)
       const attachment = new Discord.MessageAttachment('./ballistics.png')
       await message.channel.send('', attachment)
       message.delete()
       console.log('Done!')
+      break
     case '🚫':
       let menuClosed = new Discord.MessageEmbed()
         .setColor('#6a0dad')
@@ -85,6 +94,7 @@ async function recusiveTest(client, message, author, ship_list) {
         embed: menuClosed
       })
       console.log('Menu closed.')
+      break
   }
   // } catch (error) {
   //
@@ -98,7 +108,7 @@ async function getShip(client, message, user_id) {
   let embed = new Discord.MessageEmbed()
     .setColor('#6a0dad')
     .setTitle('Ballistics Graph Creation Menu')
-    .setDescription('Type your new ship.')
+    .setDescription('Type in a new ship.')
     .setTimestamp()
   await message.edit({
     embed
@@ -271,8 +281,6 @@ async function generateBallisticsGraph(ship_names, isShortCmd = false, isStock =
       yaxis: 'y2',
       type: 'scatter'
     })
-    console.log(ship_name)
-    // console.log(figure.data)
   }
 
   await generateImage(figure, imgOpts)
