@@ -42,42 +42,50 @@ async function recusiveTest(client, message, author, ship_list) {
     return ['📎', '📈', '🚫'].includes(reaction.emoji.name) && user.id == author.id;
   }
   // try {
-    let reaction = await message.awaitReactions(filter, {
-      max: 1,
-      time: 30000
-    })
-    message.reactions.removeAll()
-    switch (reaction.keys().next().value) {
-      case '📎':
-        console.log(ship_list)
-        console.log('Adding new ship...')
-        ship_list.push(await getShip(client, message, author.id))
-        console.log(`${ship_list[ship_list.length - 1].ship_name} added!`)
-        //make it nicer
-        let embed = new Discord.MessageEmbed()
-          .setColor('#6a0dad')
-          .setTitle('Ballistics Graph Creation Menu')
-          .setDescription('Use the reactions to add or remove ships, exit the menu, or change shell types.')
-          .setTimestamp()
-        for (var i = 0; i < ship_list.length; i++) {
-          embed.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
-        }
-        await message.edit({
-          embed
-        })
-        recusiveTest(client, message, author, ship_list)
-        break
-      case '📈':
-        console.log('Generating ballistics graph...')
-        console.log(ship_list)
-        await generateBallisticsGraph(ship_list)
-        const attachment = new Discord.MessageAttachment('./ballistics.png')
-        message.channel.send('', attachment)
-        message.delete()
-        console.log('Done!')
-      case '🚫':
-        message.delete()
-    }
+  let reaction = await message.awaitReactions(filter, {
+    max: 1,
+    time: 30000
+  })
+  message.reactions.removeAll()
+  switch (reaction.keys().next().value) {
+    case '📎':
+      console.log(ship_list)
+      console.log('Adding new ship...')
+      ship_list.push(await getShip(client, message, author.id))
+      console.log(`${ship_list[ship_list.length - 1].ship_name} added!`)
+      //make it nicer
+      let embed = new Discord.MessageEmbed()
+        .setColor('#6a0dad')
+        .setTitle('Ballistics Graph Creation Menu')
+        .setDescription('Use the reactions to add or remove ships, exit the menu, or change shell types.')
+        .setTimestamp()
+      for (var i = 0; i < ship_list.length; i++) {
+        embed.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
+      }
+      await message.edit({
+        embed
+      })
+      recusiveTest(client, message, author, ship_list)
+      break
+    case '📈':
+      console.log('Generating ballistics graph...')
+      console.log(ship_list)
+      await generateBallisticsGraph(ship_list)
+      const attachment = new Discord.MessageAttachment('./ballistics.png')
+      await message.channel.send('', attachment)
+      message.delete()
+      console.log('Done!')
+    case '🚫':
+      let menuClosed = new Discord.MessageEmbed()
+        .setColor('#6a0dad')
+        .setTitle('Ballistics Graph Creation Menu')
+        .setDescription('Menu closed.')
+        .setTimestamp()
+      await message.edit({
+        embed: menuClosed
+      })
+      console.log('Menu closed.')
+  }
   // } catch (error) {
   //
   // }
@@ -113,30 +121,31 @@ async function getShip(client, message, user_id) {
     }
   }
   console.log(`Ship name is ${ship_name}`)
-  embed = new Discord.MessageEmbed()
-    .setColor('#6a0dad')
-    .setTitle('Ballistics Graph Creation Menu')
-    .setDescription('Choose either HE or AP.\n🟠: HE\n⚪: AP')
-    .setTimestamp()
-  await message.edit({
-    embed
-  })
-
-  await message.react('🟠')
-  await message.react('⚪')
-  filter = (reaction, user) => {
-    return ['🟠', '⚪'].includes(reaction.emoji.name) && user.id == user_id;
-  }
-  try {
-    let reaction = await message.awaitReactions(filter, {
-      max: 1,
-      time: 30000
-    })
-    message.reactions.removeAll()
-    if (reaction.keys().next().value == '🟠') shell_type = 'HE'
-    else shell_type = 'AP'
-    console.log(`Shell type set to ${shell_type}`)
-  } catch (error) {}
+  // embed = new Discord.MessageEmbed()
+  //   .setColor('#6a0dad')
+  //   .setTitle('Ballistics Graph Creation Menu')
+  //   .setDescription('Choose either HE or AP.\n🟠: HE\n⚪: AP')
+  //   .setTimestamp()
+  // await message.edit({
+  //   embed
+  // })
+  //
+  // await message.react('🟠')
+  // await message.react('⚪')
+  // filter = (reaction, user) => {
+  //   return ['🟠', '⚪'].includes(reaction.emoji.name) && user.id == user_id;
+  // }
+  // try {
+  //   let reaction = await message.awaitReactions(filter, {
+  //     max: 1,
+  //     time: 30000
+  //   })
+  //   message.reactions.removeAll()
+  //   if (reaction.keys().next().value == '🟠') shell_type = 'HE'
+  //   else shell_type = 'AP'
+  //   console.log(`Shell type set to ${shell_type}`)
+  // } catch (error) {}
+  shell_type = 'AP'
 
   filter = (reaction, user) => {
     return ['🔴', '🔵'].includes(reaction.emoji.name) && user.id == user_id;
