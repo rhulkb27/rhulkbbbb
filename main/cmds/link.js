@@ -13,8 +13,7 @@ async function add(username) {
     throw new Error('Please enter a valid username.')
   }
 
-  data.enmap.push('ids', playerid.account_id)
-  data.enmap.push('usernames', playerid.nickname)
+  data.enmap.push('ids', {[playerid.account_id]: playerid.nickname})
 
   update.initId(playerid.account_id)
   return playerid.nickname
@@ -45,10 +44,9 @@ async function importUsers(users) {
 }
 
 function listLinks() {
-  return JSON.stringify({
-      ids: data.enmap.get('ids'),
-      names: data.enmap.get('usernames')
-  })
+  return JSON.stringify(
+      data.enmap.get('ids'),
+  )
 }
 
 function clear() {

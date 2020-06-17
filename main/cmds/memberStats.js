@@ -15,12 +15,6 @@ const apikey = "3e2c393d58645e4e4edb5c4033c56bd8"
 
 async function memberStats(clanQuery, shipQuery, isCompact) {
 
-  var shipsJson = fs.readFileSync(`${__dirname}/../utility/ships.json`)
-
-  var shipData = JSON.parse(shipsJson)
-
-  var map = new Map(Object.entries(shipData))
-
   let clanId = await superagent.get(clanSearchApi).query({
     application_id: apikey,
     fields: 'clan_id',
@@ -85,7 +79,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     prMap.set(memberName.body.data[members[i]].nickname, Math.round(PR));
   }
 
-  map = (new Map([...prMap.entries()].sort((a, b) => b[1] - a[1])))
+  var map = (new Map([...prMap.entries()].sort((a, b) => b[1] - a[1])))
 
   arr.sort(function(a, b) {
     if (a.pr > b.pr) {

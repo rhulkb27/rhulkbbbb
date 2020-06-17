@@ -105,6 +105,7 @@ class ShipStats {
 async function updateHandler() {
   console.log('Updating...                          ' + new Date);
   let idList = data.enmap.get('ids')
+  idList = Object.keys(idList)
   for (var i = 0; i < idList.length; i++) {
     await update(idList[i])
   }
@@ -212,7 +213,8 @@ async function sendGraph(discord_id, shipQuery, mode) {
     } catch (err) {
       throw new Error('Please enter a valid username.')
     }
-    let players = data.enmap.get('ids')
+
+    let players = Object.keys(data.enmap.get('ids'))
 
     if (!players.includes(player_id.account_id.toString()) && !players.includes(player_id.account_id)) throw new Error(`${player_id.nickname} is not on the database`)
     player_name = player_id.nickname
@@ -222,8 +224,8 @@ async function sendGraph(discord_id, shipQuery, mode) {
     if (!data.enmap.has('link', discord_id)) throw new Error('Player is not linked.')
 
     player_id = data.enmap.get('link', discord_id)
-    let players = data.enmap.get('ids')
-    let usernames = data.enmap.get('usernames')
+    let players = Object.keys(data.enmap.get('ids'))
+    let usernames = Object.values(data.enmap.get('ids'))
     let index = players.indexOf(player_id.toString()) == -1 ? players.indexOf(player_id) : players.indexOf(player_id.toString())
     player_name = usernames[index]
   }

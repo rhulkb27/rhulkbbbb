@@ -38,6 +38,10 @@ bot.on('message', async message => {
 
   if (message.author.id == '329081343797624832') {
     switch (command) {
+      case 'lb':
+        ballistics.listKeys()
+        break
+
       case 'll':
       case 'listLinks':
         message.channel.send(link.listLinks())

@@ -18,9 +18,11 @@ const header = {
   'User-Agent': 'beb bot'
 }
 
-// console.dir(Object.keys(enmap.get('ballistics_data')), {
-//   'maxArrayLength': null
-// });
+function listBallisticKeys() {
+  console.dir(Object.keys(enmap.get('ballistics_data')), {
+    'maxArrayLength': null
+  });
+}
 
 async function test(client, message) {
   let embed = new Discord.MessageEmbed()
@@ -62,7 +64,7 @@ async function recusiveTest(client, message, author, ship_list) {
       for (var i = 0; i < ship_list.length; i++) {
         embed.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
       }
-      embed.addField('Info', '📎: add ship\n📈: graph ballistics of added ships\n🚫: close menu')
+      embed.addField('Actions', '📎: add ship\n📈: graph ballistics of added ships\n🚫: close menu')
       await message.edit({
         embed
       })
@@ -90,7 +92,7 @@ async function recusiveTest(client, message, author, ship_list) {
         .setTitle('Ballistics Graph Creation Menu')
         .setDescription('Menu closed.')
         .setTimestamp()
-      await message.edit({
+      message.edit({
         embed: menuClosed
       })
       console.log('Menu closed.')
@@ -130,7 +132,7 @@ async function getShip(client, message, user_id) {
       break
     }
   }
-  console.log(`Ship name is ${ship_name}`)
+  console.log(`Added ${ship_name} to list`)
   // embed = new Discord.MessageEmbed()
   //   .setColor('#6a0dad')
   //   .setTitle('Ballistics Graph Creation Menu')
@@ -386,3 +388,4 @@ function getName(key, ballistics_data) {
 exports.generateBallisticsGraph = generateBallisticsGraph
 exports.test = test
 exports.init = init
+exports.listKeys = listBallisticKeys
