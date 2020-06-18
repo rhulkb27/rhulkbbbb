@@ -13,7 +13,7 @@ async function add(username) {
     throw new Error('Please enter a valid username.')
   }
 
-  data.enmap.push('ids', {[playerid.account_id]: playerid.nickname})
+  data.enmap.observe('ids')[members[i]] = memberName
 
   update.initId(playerid.account_id)
   return playerid.nickname

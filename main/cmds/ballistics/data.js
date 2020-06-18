@@ -18,6 +18,11 @@ const header = {
   'User-Agent': 'beb bot'
 }
 
+const embedTemplate = new Discord.MessageEmbed()
+  .setColor('#6a0dad')
+  .setTitle('Ballistics Graph Creation Menu')
+  .setTimestamp()
+
 function listBallisticKeys() {
   console.dir(Object.keys(enmap.get('ballistics_data')), {
     'maxArrayLength': null
@@ -43,101 +48,105 @@ async function recusiveTest(client, message, author, ship_list) {
   const filter = (reaction, user) => {
     return ['📎', '📈', '🚫'].includes(reaction.emoji.name) && user.id == author.id;
   }
-  // try {
-  let reaction = await message.awaitReactions(filter, {
-    max: 1,
-    time: 30000
-  })
-  message.reactions.removeAll()
-  switch (reaction.keys().next().value) {
-    case '📎':
-      console.log(ship_list)
-      console.log('Adding new ship...')
-      ship_list.push(await getShip(client, message, author.id))
-      console.log(`${ship_list[ship_list.length - 1].ship_name} added!`)
-      //make it nicer
-      let embed = new Discord.MessageEmbed()
-        .setColor('#6a0dad')
-        .setTitle('Ballistics Graph Creation Menu')
-        .setDescription('Use the reactions to add or remove ships, exit the menu, or change shell types.')
-        .setTimestamp()
-      for (var i = 0; i < ship_list.length; i++) {
-        embed.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
-      }
-      embed.addField('Actions', '📎: add ship\n📈: graph ballistics of added ships\n🚫: close menu')
-      await message.edit({
-        embed
-      })
-      recusiveTest(client, message, author, ship_list)
-      break
-    case '📈':
-      console.log('Generating ballistics graph...')
-      let loadingMenu = new Discord.MessageEmbed()
-        .setColor('#6a0dad')
-        .setTitle('Ballistics Graph Creation Menu')
-        .setDescription('Generating ballistics graph...')
-        .setTimestamp()
-      await message.edit({
-        embed: loadingMenu
-      })
-      await generateBallisticsGraph(ship_list)
-      const attachment = new Discord.MessageAttachment('./ballistics.png')
-      await message.channel.send('', attachment)
-      message.delete()
-      console.log('Done!')
-      break
-    case '🚫':
-      let menuClosed = new Discord.MessageEmbed()
-        .setColor('#6a0dad')
-        .setTitle('Ballistics Graph Creation Menu')
-        .setDescription('Menu closed.')
-        .setTimestamp()
-      message.edit({
-        embed: menuClosed
-      })
-      console.log('Menu closed.')
-      break
+  try {
+    let reaction = await message.awaitReactions(filter, {
+      max: 1,
+      time: 30000
+    })
+    message.reactions.removeAll()
+    switch (reaction.keys().next().value) {
+      case '📎':
+        console.log(ship_list)
+        console.log('Adding new ship...')
+        ship_list.push(await getShip(client, message, author.id))
+        console.log(`${ship_list[ship_list.length - 1].ship_name} added!`)
+        //make it nicer
+        let defaultMenu = new Discord.MessageEmbed(embedTemplate)
+        defaultMenu.setDescription('Use the reactions to add or remove ships, exit the menu, or change shell types.')
+        for (var i = 0; i < ship_list.length; i++) {
+          defaultMenu.addField(`${i + 1})`, `Ship: ${ship_list[i].ship_name}\nAmmo: ${ship_list[i].shell_type}\nGuns: ${ship_list[i].gun_type}`) // make it so u can change ammo
+        }
+        defaultMenu.addField('Actions', '📎: add ship\n📈: graph ballistics of added ships\n🚫: close menu')
+        await message.edit({
+          embed: defaultMenu
+        })
+        recusiveTest(client, message, author, ship_list)
+        break
+      case '📈':
+        console.log('Generating ballistics graph...')
+        let loadingMenu = new Discord.MessageEmbed(embedTemplate)
+        loadingMenu.setDescription('Generating ballistics graph...')
+        await message.edit({
+          embed: loadingMenu
+        })
+        await generateBallisticsGraph(ship_list)
+        const attachment = new Discord.MessageAttachment('./ballistics.png')
+        await message.channel.send('', attachment)
+        message.delete()
+        console.log('Done!')
+        break
+      case '🚫':
+        let menuClosed = new Discord.MessageEmbed(embedTemplate)
+        menuClosed.setDescription('Menu closed.')
+        message.edit({
+          embed: menuClosed
+        })
+        console.log('Menu closed.')
+        break
+    }
+  } catch (error) {
+    message.reactions.removeAll()
+    let inActiveMenu = new Discord.MessageEmbed(embedTemplate)
+    inActiveMenu.setDescription('Menu closed after 30s of inactivity.')
+    message.edit({
+      embed: inActiveMenu
+    })
   }
-  // } catch (error) {
-  //
-  // }
 }
 
 async function getShip(client, message, user_id) {
   var filter = response => {
     return response.author.id == user_id
   }
-  let embed = new Discord.MessageEmbed()
-    .setColor('#6a0dad')
-    .setTitle('Ballistics Graph Creation Menu')
-    .setDescription('Type in a new ship.')
-    .setTimestamp()
+  var getShipEmbed = new Discord.MessageEmbed(embedTemplate)
+  getShipEmbed.setDescription('Type in a new ship.')
   await message.edit({
-    embed
+    embed: getShipEmbed
   })
-  let shipQueryMessage = (await message.channel.awaitMessages(filter, {
-    max: 1,
-    time: 15000
-  })).first()
-  shipQueryMessage.delete()
-  let shipQuery = shipQueryMessage.content
-  let ballistics_data = enmap.get('ballistics_data')
-  let keyArray = Object.keys(ballistics_data)
+
   let ship_name
-  let shell_type
-  let gun_type
-  for (var i = 0; i < keyArray.length; i++) {
-    if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '').replace('-', '').replace('ß', 'ss').toLowerCase().includes(shipQuery.toLowerCase())) {
-      ship_name = keyArray[i];
-      break
+  let ballistics_data = enmap.get('ballistics_data')
+  while (!ship_name) {
+    try {
+      let shipQueryMessage = (await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: 30000
+      })).first()
+      shipQueryMessage.delete()
+      let shipQuery = shipQueryMessage.content
+      let keyArray = Object.keys(ballistics_data)
+      for (var i = 0; i < keyArray.length; i++) {
+        if (keyArray[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '').replace('-', '').replace('ß', 'ss').toLowerCase().includes(shipQuery.toLowerCase())) {
+          ship_name = keyArray[i];
+          break
+        }
+      }
+      console.log(!ship_name)
+      if (!ship_name) {
+        let noShipFound = new Discord.MessageEmbed(embedTemplate)
+        noShipFound.setDescription('Ship not found. Please type in a valid ship.')
+        await message.edit({
+          embed: noShipFound
+        })
+      }
+    } catch (error) {
+      throw new Error('Inactive Menu Error')
     }
   }
   console.log(`Added ${ship_name} to list`)
-  // embed = new Discord.MessageEmbed()
-  //   .setColor('#6a0dad')
-  //   .setTitle('Ballistics Graph Creation Menu')
-  //   .setDescription('Choose either HE or AP.\n🟠: HE\n⚪: AP')
-  //   .setTimestamp()
+  let shell_type
+  // embed = new Discord.MessageEmbed(embedTemplate)
+  // embed.setDescription('Choose either HE or AP.\n🟠: HE\n⚪: AP')
   // await message.edit({
   //   embed
   // })
@@ -162,17 +171,14 @@ async function getShip(client, message, user_id) {
   filter = (reaction, user) => {
     return ['🔴', '🔵'].includes(reaction.emoji.name) && user.id == user_id;
   }
-
+  let gun_type
   if (ballistics_data[ship_name].ammo_num == 2) {
     let gun_choice_1 = ballistics_data[ship_name].Artillery0[shell_type].name
     let gun_choice_2 = ballistics_data[ship_name].Artillery1[shell_type].name
-    embed = new Discord.MessageEmbed()
-      .setColor('#6a0dad')
-      .setTitle('Ballistics Graph Creation Menu')
-      .setDescription(`Choose which gun to use.\n🔴: ${gun_choice_1}\n🔵: ${gun_choice_2}`)
-      .setTimestamp()
+    var gunChoose = new Discord.MessageEmbed(embedTemplate)
+    gunChoose.setDescription(`Choose which gun to use.\n🔴: ${gun_choice_1}\n🔵: ${gun_choice_2}`)
     await message.edit({
-      embed
+      embed: gunChoose
     })
     await message.react('🔴')
     await message.react('🔵')
@@ -184,11 +190,12 @@ async function getShip(client, message, user_id) {
       message.reactions.removeAll()
       if (reaction.keys().next().value == '🔴') gun_type = gun_choice_1
       else gun_type = gun_choice_2
-    } catch (error) {}
+    } catch (error) {
+      throw new Error('Inactive Menu Error')
+    }
   } else {
     gun_type = ballistics_data[ship_name].Artillery0[shell_type].name
   }
-
   return {
     ship_name,
     shell_type,
@@ -254,7 +261,7 @@ async function generateBallisticsGraph(ship_names, isShortCmd = false, isStock =
         fields: 'default_profile.artillery.distance'
       })).body.data[ship_id].default_profile.artillery.distance
 
-      range *= 1.4 * 1000
+      range *= 1.2 * 1000
     }
 
     let ballistics_obj
