@@ -119,15 +119,15 @@ bot.on('message', async message => {
 
     case 'ct':
     case 'clantop':
-      try {
+      // try {
         let isCompact = args[2] == 'e' ? false : true
         let embed = await memberStats.memberStats(args[0], args[1], isCompact)
         message.channel.send({
           embed
         })
-      } catch (err) {
-        message.channel.send(err.message)
-      }
+      // } catch (err) {
+      //   message.channel.send(err.message)
+      // }
       break
 
     case 'g':
