@@ -66,7 +66,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     let PR = await pr.pr(data, shipId)
 
     let arr2 = {
-      name: (memberName.body.data[members[i]].nickname).replace('_', '\_'),
+      name: (memberName.body.data[members[i]].nickname).replaceAll('_', '\_'),
       pr: PR,
       battles: data.battles,
       dmg: Math.round(data.damage_dealt / data.battles),
