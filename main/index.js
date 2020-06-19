@@ -108,26 +108,26 @@ bot.on('message', async message => {
 
     case 'b':
     case 'ballistics':
-      // try {
-      await ballistics.generateBallisticsGraph(args, true)
-      const attachment = new Discord.MessageAttachment('./ballistics.png')
-      message.channel.send('', attachment)
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      try {
+        await ballistics.generateBallisticsGraph(args, true)
+        const attachment = new Discord.MessageAttachment('./ballistics.png')
+        message.channel.send('', attachment)
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'ct':
     case 'clantop':
-      // try {
+      try {
         let isCompact = args[2] == 'e' ? false : true
         let embed = await memberStats.memberStats(args[0], args[1], isCompact)
         message.channel.send({
           embed
         })
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'g':

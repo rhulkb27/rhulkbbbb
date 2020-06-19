@@ -119,6 +119,8 @@ async function initHandler() {
   expected_values = expected_values.body.data
 
   data.enmap.set('expected_values', expected_values)
+
+  fs.writeFileSync(`./enmap-backup${(new Date()).getDate()}.json`, data.enmap.export())
 }
 
 function debug(key) {
