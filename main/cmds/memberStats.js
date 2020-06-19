@@ -61,12 +61,12 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     if (memberData.body.data[members[i]] === null) continue
     let data = memberData.body.data[members[i]][0].pvp
 
-    if (data.battles == 0) continue
+    if (data.battles < 10) continue
 
     let PR = await pr.pr(data, shipId)
 
     let arr2 = {
-      name: memberName.body.data[members[i]].nickname,
+      name: (memberName.body.data[members[i]].nickname).replace('_', '\_'),
       pr: PR,
       battles: data.battles,
       dmg: Math.round(data.damage_dealt / data.battles),
