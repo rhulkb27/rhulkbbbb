@@ -42,6 +42,10 @@ bot.on('message', async message => {
         ballistics.listKeys()
         break
 
+      case 'backup':
+        graph.backup(args[0])
+        break
+
       case 'll':
       case 'listLinks':
         message.channel.send(link.listLinks())

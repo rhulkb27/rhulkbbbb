@@ -180,7 +180,7 @@ async function init(playerid) {
   // let testData = fs.readFileSync(`${__dirname}/../playerData/1023637668.json`)
   // let playerstats = JSON.parse(testData)
 
-  if (!data.enmap.has(playerid)) {
+  if (!data.enmap.has(playerid) || !data.enmap.has(playerid.toString())) {
 
     let playerstats = await superagent.get(userDataApi).query({
       application_id: apikey,
@@ -279,6 +279,11 @@ async function sendGraph(discord_id, shipQuery, mode) {
   await generateImage(figure, imgOpts)
 }
 
+async function importBackup(index) {
+  const backup = await fs.readFileSync(`./enmap-backup${index}.json`)
+  data.enmap.import(backup)
+}
+
 function generateImage(figure, imgOpts) {
   return new Promise((resolve, reject) => {
     plotly.getImage(figure, imgOpts, (err, imageStream) => {
@@ -297,3 +302,4 @@ exports.graph = sendGraph
 exports.update = updateHandler
 exports.debug = debug
 exports.pr = generatePR
+exports.backup = importBackup

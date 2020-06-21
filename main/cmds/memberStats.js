@@ -66,7 +66,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     let PR = await pr.pr(data, shipId)
 
     let arr2 = {
-      name: memberName.body.data[members[i]].nickname.replace(/_/g, '\_'),
+      name: memberName.body.data[members[i]].nickname,
       pr: PR,
       battles: data.battles,
       dmg: Math.round(data.damage_dealt / data.battles),
@@ -111,7 +111,7 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
   if (isCompact) {
     embed
       .setTitle(`Clan: ${clanTag}              Ship: ${shipName}`)
-      .setDescription(description)
+      .setDescription(description.replace(/_/g, '\_'))
   } else {
     embed
       .setTitle(`Clan: ${clanTag}\nShip: ${shipName}`)
