@@ -11,7 +11,7 @@ const enmap = new Enmap({
   name: "ballistics"
 })
 
-const url = 'https://api.github.com/repos/jcw780/LiveGameData/contents/0.9.5.0'
+const url = 'https://api.\'
 const range_url = 'https://api.worldofwarships.ru/wows/encyclopedia/ships/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 const header = {
@@ -375,6 +375,8 @@ function getName(key, ballistics_data) {
       return 'République'
     case 'PGSB110_Grossdeutschland':
       return 'Großer Kurfürst'
+    case 'PRSB110_Sovetskaya_Rossiya':
+      return 'Kremlin'
   }
   let name = key.split('_')
   if (badShips.includes(key) || _.intersection(name, ['TST', 'Black', 'Asus', 'KIM', 'Camo', 'Dragon', 'event', 'Event']).length > 0) {
