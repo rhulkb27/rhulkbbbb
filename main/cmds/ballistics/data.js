@@ -11,7 +11,7 @@ const enmap = new Enmap({
   name: "ballistics"
 })
 
-const url = 'https://api.\'
+const url = 'https://api.github.com/repos/jcw780/LiveGameData/contents/0.9.5.0'
 const range_url = 'https://api.worldofwarships.ru/wows/encyclopedia/ships/'
 const apikey = '3e2c393d58645e4e4edb5c4033c56bd8'
 const header = {
