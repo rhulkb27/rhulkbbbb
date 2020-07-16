@@ -121,17 +121,29 @@ bot.on('message', async message => {
       }
       break
 
+    case 'h':
+    case 'history':
+      try {
+        let embed = await history.history(args[0], args[1])
+        message.channel.send({
+          embed
+        })
+      } catch (err) {
+        message.channel.send(err.message)
+      }
+      break
+
     case 'ct':
     case 'clantop':
-      // try {
+      try {
         let isCompact = args[2] == 'e' ? false : true
         let embed = await memberStats.memberStats(args[0], args[1], isCompact)
         message.channel.send({
           embed
         })
-      // } catch (err) {
-      //   message.channel.send(err.message)
-      // }
+      } catch (err) {
+        message.channel.send(err.message)
+      }
       break
 
     case 'g':
@@ -194,7 +206,7 @@ function getUserFromMention(mention) {
     }
     return bot.users.get(mention)
   } else {
-    throw new Error('Please enter an actual user')
+    throw new Error('Please enter a valid user')
   }
 }
 

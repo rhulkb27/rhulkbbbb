@@ -242,6 +242,7 @@ async function generateBallisticsGraph(ship_names, isShortCmd = false, isStock =
           break
         }
       }
+      if (!ship_name) throw new Error(`\`${ship_names[i]}\` is an invalid ship name.`)
     } else {
       shell_type = ship_names[i].shell_type
       ship_name = ship_names[i].ship_name
