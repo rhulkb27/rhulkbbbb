@@ -55,10 +55,12 @@ async function memberStats(clanQuery, shipQuery, isCompact) {
     let memberName = await superagent.get(memberNameApi).query({
       application_id: apikey,
       account_id: members[i],
-      fields: 'nickname'
+      fields: 'nickname, hidden_profile'
     })
 
+    if (memberName.body.data[members[i]].hidden_profile) continue
     if (memberData.body.data[members[i]] === null) continue
+
     let data = memberData.body.data[members[i]][0].pvp
 
     if (data.battles < 10) continue
